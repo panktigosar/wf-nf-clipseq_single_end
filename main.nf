@@ -568,8 +568,9 @@ if (params.move_umi) {
  */
 process cutadapt {
     tag "$name"
-    label 'process_high'
+    // label 'process_high'
     memory '16 GB'
+    cpus 16
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
     input:
