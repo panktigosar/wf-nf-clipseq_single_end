@@ -404,7 +404,9 @@ if (!params.star_index) {
     if (params.gtf) {
         process generate_star_index {
             tag "$fasta"
-            label 'process_high'
+            // label 'process_high'
+            cpus 8
+            memory '52 GB'
             publishDir path: { params.save_index ? "${params.outdir}/STAR_index" : params.outdir },
                 saveAs: { params.save_index ? it : null }, mode: params.publish_dir_mode
 
@@ -567,6 +569,7 @@ if (params.move_umi) {
 process cutadapt {
     tag "$name"
     label 'process_high'
+    memory '16 GB'
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
     input:
@@ -619,7 +622,9 @@ if (params.smrna_fasta) {
  */
 process align {
     tag "$name"
-    label 'process_high'
+    // label 'process_high'
+    cpus 8
+    memory '52 GB'
     publishDir "${params.outdir}/mapped", mode: params.publish_dir_mode
 
     input:
