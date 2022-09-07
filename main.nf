@@ -712,10 +712,11 @@ if (params.deduplicate) {
         """
     }
 } else {
-    ch_dedup = ch_aligned
+    ch_aligned into { ch_dedup, ch_dedup_rseqc}
+    // ch_dedup = ch_aligned 
     ch_dedup_mqc = Channel.empty()
     ch_dedup_qc = Channel.empty()
-    ch_dedup_rseqc = ch_aligned
+    // ch_dedup_rseqc = ch_aligned
 }
 
 /*
