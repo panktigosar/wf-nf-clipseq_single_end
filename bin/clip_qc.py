@@ -16,7 +16,8 @@ import numpy as np
 # ==========
 
 # First get Bowtie2 logs
-if os.listdir.isdir('premap'):
+
+if os.listdir('premap').isdir():
     if f.endswith('.log'):
 
         bowtie_logs = sorted(['premap/' + f ])
