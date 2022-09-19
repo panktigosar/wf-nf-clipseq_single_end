@@ -16,7 +16,7 @@ import numpy as np
 # ==========
 
 # First get Bowtie2 logs
-for f in os.listdir('premap'):
+if os.listdir.isdir('premap'):
     if f.endswith('.log'):
 
         bowtie_logs = sorted(['premap/' + f ])
@@ -40,8 +40,8 @@ for f in os.listdir('premap'):
                 smrna['smrna_reads'].append(input_reads - output_reads)
 
         smrna_df = pd.DataFrame(smrna)
-    else:
-        pass
+else:
+    pass
 
 # Next get STAR logs 
 star_logs = sorted(['mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
