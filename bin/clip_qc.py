@@ -19,13 +19,10 @@ import numpy as np
 
 if os.listdir('premap').isdir():
     try:
-        if f.endswith('.log'):
-
+        while f.endswith('.log'):
             bowtie_logs = sorted(['premap/' + f ])
             smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
-
             for bowtie_log in bowtie_logs:
-
                 with open(bowtie_log, 'r') as logfile:
 
                     exp = re.sub('.premap.log', '', os.path.basename(bowtie_log))
