@@ -16,27 +16,32 @@ import numpy as np
 # ==========
 
 # First get Bowtie2 logs
-bowtie_logs = sorted(['premap/' + f for f in os.listdir('premap') if f.endswith('.log')])
+for f in os.listdir('premap'):
+    if f.endswith('.log'):
 
-smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
+        bowtie_logs = sorted(['premap/' + f ])
 
-for bowtie_log in bowtie_logs:
+        smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
 
-    with open(bowtie_log, 'r') as logfile:
+        for bowtie_log in bowtie_logs:
 
-        exp = re.sub('.premap.log', '', os.path.basename(bowtie_log))
+            with open(bowtie_log, 'r') as logfile:
 
-        lines = logfile.readlines()
+                exp = re.sub('.premap.log', '', os.path.basename(bowtie_log))
+
+                lines = logfile.readlines()
         
-        input_reads = int(re.findall(r'\d+', lines[0])[0])
-        output_reads = [i for i in lines if 'aligned 0 times' in i]
-        output_reads = int(re.findall(r'\d+', output_reads[0])[0])
+                input_reads = int(re.findall(r'\d+', lines[0])[0])
+                output_reads = [i for i in lines if 'aligned 0 times' in i]
+                output_reads = int(re.findall(r'\d+', output_reads[0])[0])
 
-        smrna['exp'].append(exp)
-        smrna['input_reads'].append(input_reads)
-        smrna['smrna_reads'].append(input_reads - output_reads)
+                smrna['exp'].append(exp)
+                smrna['input_reads'].append(input_reads)
+                smrna['smrna_reads'].append(input_reads - output_reads)
 
-smrna_df = pd.DataFrame(smrna)
+        smrna_df = pd.DataFrame(smrna)
+    else:
+        pass
 
 # Next get STAR logs 
 star_logs = sorted(['mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
