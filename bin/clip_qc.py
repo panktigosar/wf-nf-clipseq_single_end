@@ -38,7 +38,8 @@ if os.listdir('premap').isdir():
                     smrna['smrna_reads'].append(input_reads - output_reads)
 
             smrna_df = pd.DataFrame(smrna)
-    except FileNotFoundError:
+    except FileNotFoundError as err:
+        print("Try something else")
         pass
 
 # Next get STAR logs 
