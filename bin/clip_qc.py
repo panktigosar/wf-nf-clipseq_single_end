@@ -72,9 +72,14 @@ for star_log in star_logs:
 
 genome_df = pd.DataFrame(genome)
 
-# Combine the two
-mapping_df = pd.merge(smrna_df, genome_df, on = 'exp')
+if smrna_df:
+    # Combine the two
+    mapping_df = pd.merge(smrna_df, genome_df, on = 'exp')
+else:
+    mapping_df = genome_df
+
 mapping_df.to_csv('mapping_metrics.tsv', sep = '\t', index = False)
+
 
 # Subset for MultiQC plots
 mapping_df.loc[:, ['exp', 'smrna_reads', 'genome_reads', 'unmapped_reads']].to_csv('mapping.tsv', sep = '\t', index = False)
