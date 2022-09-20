@@ -24,7 +24,7 @@ for premap in os.listdir():
         files = os.listdir(premap)
     except FileNotFoundError:
         continue
-    while files.endswith('.log'):
+    while f.endswith('.log') for f in files:
         bowtie_logs = sorted(['premap/' + f ])
         smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
         for bowtie_log in bowtie_logs:
