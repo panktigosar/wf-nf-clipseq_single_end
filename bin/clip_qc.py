@@ -21,7 +21,7 @@ import numpy as np
 for premap in os.listdir():
 
     try:
-        files = os.listdir('premap)
+        files = os.listdir('premap')
     except FileNotFoundError:
         continue
     while f.endswith('.log') for f in os.listdir('premap'):
