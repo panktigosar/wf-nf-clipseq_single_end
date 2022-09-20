@@ -17,7 +17,11 @@ import numpy as np
 
 # First get Bowtie2 logs
 
+<<<<<<< HEAD
 for premap in os.listdir():
+=======
+for premap in FileNameList:
+>>>>>>> b994adb9dbb96481b1d97b27fd55181495f7102f
     try:
         files = os.listdir(premap)
     except FileNotFoundError:
@@ -39,7 +43,11 @@ for premap in os.listdir():
                 smrna['smrna_reads'].append(input_reads - output_reads)
 
         smrna_df = pd.DataFrame(smrna)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> b994adb9dbb96481b1d97b27fd55181495f7102f
 # Next get STAR logs 
 star_logs = sorted(['mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
 
