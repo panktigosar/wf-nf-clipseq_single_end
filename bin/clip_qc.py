@@ -21,11 +21,11 @@ import numpy as np
 for premap in os.listdir():
 
     try:
-        files = os.listdir(premap)
+        files = os.listdir('premap)
     except FileNotFoundError:
         continue
-    while f.endswith('.log') for f in files:
-        bowtie_logs = sorted(['premap/' + f ])
+    while f.endswith('.log') for f in os.listdir('premap'):
+        bowtie_logs = sorted(['premap/' + f for f in os.listdir('premap') if f.endswith('.log')])
         smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
         for bowtie_log in bowtie_logs:
             with open(bowtie_log, 'r') as logfile:
