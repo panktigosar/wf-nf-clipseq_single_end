@@ -7,7 +7,7 @@
 import os
 import sys
 import re
-#import pybedtools
+import pybedtools
 import pandas as pd
 import numpy as np
 
@@ -72,7 +72,7 @@ for star_log in star_logs:
 
 genome_df = pd.DataFrame(genome)
 
-if smrna_df:
+if smrna_df.any:
     # Combine the two
     mapping_df = pd.merge(smrna_df, genome_df, on = 'exp')
 else:
