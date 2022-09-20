@@ -22,26 +22,26 @@ for premap in os.listdir():
 
     try:
         files = os.listdir('premap')
+        for f in os.listdir('premap'):
+            while f.endswith('.log'):
+                bowtie_logs = sorted(['premap/' + f for f in os.listdir('premap') if f.endswith('.log')])
+                smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
+                for bowtie_log in bowtie_logs:
+                    with open(bowtie_log, 'r') as logfile:
+                        exp = re.sub('.premap.log', '', os.path.basename(bowtie_log))
+
+                        lines = logfile.readlines()
+                        input_reads = int(re.findall(r'\d+', lines[0])[0])
+                        output_reads = [i for i in lines if 'aligned 0 times' in i]
+                        output_reads = int(re.findall(r'\d+', output_reads[0])[0])
+
+                        smrna['exp'].append(exp)
+                        smrna['input_reads'].append(input_reads)
+                        smrna['smrna_reads'].append(input_reads - output_reads)
+
+                    smrna_df = pd.DataFrame(smrna)
     except FileNotFoundError:
         continue
-    for f in os.listdir('premap'):
-        while f.endswith('.log'):
-            bowtie_logs = sorted(['premap/' + f for f in os.listdir('premap') if f.endswith('.log')])
-            smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
-            for bowtie_log in bowtie_logs:
-                with open(bowtie_log, 'r') as logfile:
-                    exp = re.sub('.premap.log', '', os.path.basename(bowtie_log))
-
-                    lines = logfile.readlines()
-                    input_reads = int(re.findall(r'\d+', lines[0])[0])
-                    output_reads = [i for i in lines if 'aligned 0 times' in i]
-                    output_reads = int(re.findall(r'\d+', output_reads[0])[0])
-
-                    smrna['exp'].append(exp)
-                    smrna['input_reads'].append(input_reads)
-                    smrna['smrna_reads'].append(input_reads - output_reads)
-
-        smrna_df = pd.DataFrame(smrna)
 
 
 # Next get STAR logs 
