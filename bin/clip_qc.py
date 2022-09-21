@@ -41,7 +41,7 @@ for premap in os.listdir():
 
                     smrna_df = pd.DataFrame(smrna)
     except FileNotFoundError:
-        smrna_df = pd.DataFrame(smrna['exp'])
+        #smrna_df = pd.DataFrame()
         continue
 
 
