@@ -41,9 +41,22 @@ for premap in os.listdir():
 
                     smrna_df = pd.DataFrame(smrna)
     except FileNotFoundError:
-        #smrna_df = pd.DataFrame()
-        continue
+        star_logs = sorted(['/shared/data/sandbox/pgosar/clipseqtrial/mapped/' + f for f in os.listdir('/shared/data/sandbox/pgosar/clipseqtrial/mapped') if f.endswith('.Log.final.out')])
+        smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
+        #genome = dict((key, []) for key in ['exp', 'genome_reads', 'unmapped_reads'])
 
+        for star_log in star_logs:
+            with open(star_log, 'r') as logfile:
+                exp = re.sub('.Log.final.out', '', os.path.basename(star_log))
+        
+                #lines = logfile.readlines()
+                input_reads = 0
+                output_reads = 0
+
+                smrna['exp'].append(exp)
+                smrna['input_reads'].append(input_reads)
+                smrna['smrna_reads'].append(input_reads - output_reads)
+    smrna_df = pd.DataFrame(smrna)
 
 # Next get STAR logs 
 star_logs = sorted(['mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
@@ -72,12 +85,8 @@ for star_log in star_logs:
 
 genome_df = pd.DataFrame(genome)
 
-if smrna_df.any:
-    # Combine the two
-    mapping_df = pd.merge(smrna_df, genome_df, on = 'exp')
-else:
-    mapping_df = genome_df
-
+# Combine the two
+mapping_df = pd.merge(smrna_df, genome_df, on = 'exp')
 mapping_df.to_csv('mapping_metrics.tsv', sep = '\t', index = False)
 
 
