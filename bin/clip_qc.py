@@ -41,7 +41,7 @@ for premap in os.listdir():
 
                     smrna_df = pd.DataFrame(smrna)
     except FileNotFoundError:
-        star_logs = sorted(['/shared/data/sandbox/pgosar/clipseqtrial/mapped/' + f for f in os.listdir('/shared/data/sandbox/pgosar/clipseqtrial/mapped') if f.endswith('.Log.final.out')])
+        star_logs = sorted(['mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
         smrna = dict((key, []) for key in ['exp', 'input_reads', 'smrna_reads'])
         #genome = dict((key, []) for key in ['exp', 'genome_reads', 'unmapped_reads'])
 
