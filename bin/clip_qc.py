@@ -46,7 +46,7 @@ for premap in os.listdir():
 
 
 # Next get STAR logs 
-star_logs = sorted(['/mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
+star_logs = sorted(['mapped/' + f for f in os.listdir('mapped') if f.endswith('.Log.final.out')])
 
 genome = dict((key, []) for key in ['exp', 'genome_reads', 'unmapped_reads'])
 
