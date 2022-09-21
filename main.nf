@@ -1124,7 +1124,7 @@ process multiqc {
     output:
     file "*multiqc_report.html" into ch_multiqc_report
     file "*_data"
-    file "multiqc_plots"
+    //file "multiqc_plots"
 
     script:
     rtitle = ''
