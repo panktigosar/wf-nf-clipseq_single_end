@@ -1306,4 +1306,3 @@ def checkHostname() {
             }
         }
     }
-}

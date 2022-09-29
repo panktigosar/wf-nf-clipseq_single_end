@@ -144,7 +144,8 @@ def read_bed(filename):
     return df
 
 # First get xlink bed files
-xlinks_files = sorted(['xlinks/' + f for f in os.listdir('xlinks') if f.endswith('.xl.bed.gz')])
+xlinkdir = "/xlinks/"
+xlinks_files = sorted([xlinkdir + f for f in os.listdir(xlinkdir) if f.endswith('.xl.bed.gz')])
 
 xlinks = dict((key, []) for key in ['exp', 'total_xlinks', 'total_xlinksites', 'ratio'])
 
