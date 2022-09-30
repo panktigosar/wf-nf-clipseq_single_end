@@ -68,7 +68,7 @@ params.star_index = params.genome ? params.genomes[ params.genome ].star ?: fals
 
 // Check input path parameters to see if they exist
 checkPathParamList = [
-    params.input,
+    params.input, //params.fastq,
     params.fasta,
     params.gtf,
     params.star_index,
@@ -157,7 +157,7 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp-fastq, checkIfExists: true), file(row.control-fastq) ] }
+        .map{ row -> [ row.sample, file(row.fastq, checkIfExists: true) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
 } else {
     exit 1, "Samples comma-separated input file not specified"
@@ -311,7 +311,7 @@ if (params.smrna_fasta) {
 /*
  * Decompression
  */
-// Recognise if fasta and/or gtf are compressed and decompress if so for STAR index generation
+
 if (params.fasta) {
     if (hasExtension(params.fasta, 'gz')) {
         ch_fasta_gz = Channel
@@ -568,9 +568,7 @@ if (params.move_umi) {
  */
 process cutadapt {
     tag "$name"
-    // label 'process_high'
-    memory '16 GB'
-    cpus 16
+    // label 'process_high'memory '16 GB'    cpus 16
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
     input:
