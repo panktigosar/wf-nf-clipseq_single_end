@@ -17,7 +17,7 @@ log.info Headers.nf_core(workflow, params.monochrome_logs)
 
 def json_schema = "$projectDir/nextflow_schema.json"
 if (params.help) {
-    def command = "nextflow run nf-core/clipseq --input samplesheet.csv --fasta genome.fasta -profile docker"
+    def command = "nextflow run nf-core/clipseq --input samplesheet.csv --fasta genome.fasta -profile docker main.nf"
     log.info NfcoreSchema.params_help(workflow, params, json_schema, command)
     exit 0
 }
@@ -68,7 +68,8 @@ params.star_index = params.genome ? params.genomes[ params.genome ].star ?: fals
 
 // Check input path parameters to see if they exist
 checkPathParamList = [
-    params.input, //params.fastq,
+    params.input,
+    //params.input_control,
     params.fasta,
     params.gtf,
     params.star_index,
@@ -84,7 +85,15 @@ if(!params.smrna_fasta) {
         log.warn "There is no smRNA fasta file suppled for genome specified; pre-mapping will be skipped. A smRNA fasta file can be specified on the command line with --smrna_fasta or --smrna_org"
     }
 }
-
+/*
+if(!params.input_control) {
+    if(params.input_control) {
+        log.warn "There is no available control file provided '${params.input_control}';  --input_control"
+    } else {
+        log.warn "give a control file with --input_control or --smrna_org"
+    }
+}
+*/
 /*---- Check Peakcaller Options ---*/
 
 callerList = [ 'icount', 'paraclu', 'pureclip', 'piranha']
@@ -157,12 +166,23 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true),  file(row.control_fastq, checkIfExists: true)] }
+        .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
+        //print(row.exp_fastq)
 } else {
     exit 1, "Samples comma-separated input file not specified"
 }
-
+/*
+if (params.input_control) {
+    Channel
+        .fromPath(params.input, checkIfExists: true)
+        .splitCsv(header:true)
+        .map{ row -> tuple( row.sample, file(row.control_fastq, checkIfExists: true)) }
+        .into{ ch_fastq; ch_fastq_fastqc_pretrim }
+} else {
+    params.input_control = false
+}
+*/
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
 ////////////////////////////////////////////////////
@@ -514,7 +534,7 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(reads) from ch_fastq_fastqc_pretrim
+    tuple val(name), path(exp_fastq) from ch_fastq_fastqc_pretrim
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
@@ -524,6 +544,7 @@ process fastqc {
     read_name = reads.getName().split('\\.', 2)[0]
     new_reads = "${name}_reads_fastqc.${read_ext}"
     new_reads_simple = "${name}_reads_fastqc"
+    print(new_reads_simple)
     """
     cp ${reads} ${new_reads}
     fastqc --quiet --threads $task.cpus ${new_reads}
