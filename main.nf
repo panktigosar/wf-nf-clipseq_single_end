@@ -534,7 +534,7 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(exp_fastq) from ch_fastq_fastqc_pretrim
+    tuple val(name), path(reads) from ch_fastq_fastqc_pretrim
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
