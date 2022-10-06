@@ -85,6 +85,7 @@ if(!params.smrna_fasta) {
         log.warn "There is no smRNA fasta file suppled for genome specified; pre-mapping will be skipped. A smRNA fasta file can be specified on the command line with --smrna_fasta or --smrna_org"
     }
 }
+
 /*
 if(!params.input_control) {
     if(params.input_control) {
@@ -166,23 +167,19 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true) ] }
+        .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true), file(row.control_fastq) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
-        //print(row.exp_fastq)
-} else {
+        /*
+        if (file(null_control_fastqc)) {
+            "The test sample is running with control"
+        } else {
+            "The test sample is running without control"
+        } */
+        
+} else {  
     exit 1, "Samples comma-separated input file not specified"
 }
-/*
-if (params.input_control) {
-    Channel
-        .fromPath(params.input, checkIfExists: true)
-        .splitCsv(header:true)
-        .map{ row -> tuple( row.sample, file(row.control_fastq, checkIfExists: true)) }
-        .into{ ch_fastq; ch_fastq_fastqc_pretrim }
-} else {
-    params.input_control = false
-}
-*/
+ch_fastq.dump()
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
 ////////////////////////////////////////////////////
@@ -534,7 +531,7 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(reads) from ch_fastq_fastqc_pretrim
+    tuple val(name), path(reads), path(control) from ch_fastq_fastqc_pretrim // check syntax
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
@@ -545,14 +542,25 @@ process fastqc {
     new_reads = "${name}_reads_fastqc.${read_ext}"
     new_reads_simple = "${name}_reads_fastqc"
     print(new_reads_simple)
+
+    control_ext = control.getName().split('\\.', 2)[1]
+    control_name = control.getName().split('\\.', 2)[0]
+    new_control = "${name}_control_fastqc.${control_ext}"
+    new_control_simple = "${name}_control_fastqc"
+    print(new_control_simple)
+
     """
     cp ${reads} ${new_reads}
     fastqc --quiet --threads $task.cpus ${new_reads}
     mv ${new_reads_simple}*.html ${name}_reads_fastqc.html
     mv ${new_reads_simple}*.zip ${name}_reads_fastqc.zip
+
+    cp ${control} ${new_control}
+    fastqc --quiet --threads $task.cpus ${new_control}
+    mv ${new_control_simple}*.html ${name}_control_fastqc.html
+    mv ${new_control_simple}*.zip ${name}_control_fastqc.zip
     """
 }
-
 /*
  * STEP 1.1 - Move UMI to FastQ header if flagged
  */
@@ -566,7 +574,7 @@ if (params.move_umi) {
                     }
 
         input:
-        tuple val(name), path(reads) from ch_fastq
+        tuple val(name), path(reads), path(control) from ch_fastq
 
         output:
         tuple val(name), path("${name}.umi.fastq.gz") into ch_umi_moved
@@ -593,7 +601,7 @@ process cutadapt {
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(reads) from ch_umi_moved
+    tuple val(name), path(reads), path(control) from ch_umi_moved // 
 
     output:
     tuple val(name), path("${name}.trimmed.fastq.gz") into ch_trimmed
@@ -603,9 +611,12 @@ process cutadapt {
     """
     ln -s $reads ${name}.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
+
+    ln -s $control ${name}.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
     """
 }
-
+ch_cutadapt_mqc.dump()
 /*
  * STEP 3 - Premapping
  */
@@ -616,7 +627,7 @@ if (params.smrna_fasta) {
         publishDir "${params.outdir}/premap", mode: params.publish_dir_mode
 
         input:
-        tuple val(name), path(reads) from ch_trimmed
+        tuple val(name), path(reads), path(control) from ch_trimmed
         path(index) from ch_bt2_index.collect()
 
         output:
@@ -648,7 +659,7 @@ process align {
     publishDir "${params.outdir}/mapped", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(reads) from ch_unmapped
+    tuple val(name), path(reads), path(control) from ch_unmapped
     path(index) from ch_star_index.collect()
 
     output:
@@ -1006,8 +1017,6 @@ if ('pureclip' in callers) {
         }
     }
 }
-
-
 /*
  * STEP 8d - Peak-call (Piranha)
  */
@@ -1046,6 +1055,7 @@ if ('piranha' in callers) {
         pigz > ${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz
         """
     }
+
 
     if (params.motif) {
         process piranha_motif_dreme {
