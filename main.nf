@@ -610,7 +610,8 @@ process cutadapt {
     tuple val(name), path(reads), path(control) from ch_umi_moved // 
 
     output:
-    tuple val(name), path("${name}.trimmed.fastq.gz") into ch_trimmed
+    tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}.control.trimmed.fastq.gz") into ch_trimmed
+
     path "*.log" into ch_cutadapt_mqc
 
     script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
@@ -618,8 +619,8 @@ process cutadapt {
     ln -s $reads ${name}.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
 
-    ln -s $control ${name}.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
+    ln -s $control ${name}.control.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control.trimmed.fastq.gz ${name}.control.fastq.gz > ${name}_control_cutadapt.log
     """
 }
 ch_cutadapt_mqc.dump()
