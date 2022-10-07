@@ -621,7 +621,7 @@ process cutadapt {
     ln -s $reads ${name}.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
 
-    ln -s $control ${name}.control.fastq.gz
+    ln -s $control ${name}_control.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}_control.trimmed.fastq.gz ${name}_control.fastq.gz > ${name}_control_cutadapt.log
     """
 }
