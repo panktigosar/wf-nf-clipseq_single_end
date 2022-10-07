@@ -682,7 +682,7 @@ process align {
                 --outFilterMultimapScoreRange 1 \
                 --outSAMattributes All \
                 --alignSJoverhangMin 8 \
-                --alignSJDBoverhangMin 1 \s
+                --alignSJDBoverhangMin 1 \
                 --outFilterType BySJout \
                 --alignIntronMin 20 \
                 --alignIntronMax 1000000 \
@@ -690,6 +690,7 @@ process align {
                 --alignEndsType Extend5pOfRead1 \
                 --twopassMode Basic \
                 --outSAMtype BAM Unsorted"
+
     """
     STAR \\
         --runThreadN $task.cpus \\
