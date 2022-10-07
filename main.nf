@@ -179,7 +179,6 @@ if (params.input) {
 } else {  
     exit 1, "Samples comma-separated input file not specified"
 }
-// ch_fastq.dump()
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
 ////////////////////////////////////////////////////
@@ -550,6 +549,9 @@ process fastqc {
     print(new_control_simple)
 
     """
+    echo ${name}
+    echo ${reads}
+    echo ${control}
     cp ${reads} ${new_reads}
     fastqc --quiet --threads $task.cpus ${new_reads}
     mv ${new_reads_simple}*.html ${name}_reads_fastqc.html
@@ -610,7 +612,7 @@ process cutadapt {
     tuple val(name), path(reads), path(control) from ch_umi_moved // 
 
     output:
-    tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}.control.trimmed.fastq.gz") into ch_trimmed
+    tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}_control.trimmed.fastq.gz") into ch_trimmed
 
     path "*.log" into ch_cutadapt_mqc
 
@@ -620,10 +622,9 @@ process cutadapt {
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
 
     ln -s $control ${name}.control.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control.trimmed.fastq.gz ${name}.control.fastq.gz > ${name}_control_cutadapt.log
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}_control.trimmed.fastq.gz ${name}_control.fastq.gz > ${name}_control_cutadapt.log
     """
 }
-ch_cutadapt_mqc.dump()
 /*
  * STEP 3 - Premapping
  */
@@ -674,7 +675,7 @@ process align {
     path(index) from ch_star_index.collect()
 
     output:
-    tuple val(name), path("${name}.Aligned.sortedByCoord.out.bam"), path("${name}.Aligned.sortedByCoord.out.bam.bai") into ch_aligned, ch_aligned_preseq
+    tuple val(name), path("${name}.Aligned.sortedByCoord.out.bam"), path("${name}.Aligned.sortedByCoord.out.bam.bai"), path("${name}_control.Aligned.sortedByCoord.out.bam"), path("${name}_control.Aligned.sortedByCoord.out.bam.bai") into ch_aligned, ch_aligned_preseq
     path "*.Log.final.out" into ch_align_mqc, ch_align_qc
 
     script:
