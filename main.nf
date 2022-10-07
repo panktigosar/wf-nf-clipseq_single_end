@@ -682,7 +682,7 @@ process align {
                 --outFilterMultimapScoreRange 1 \
                 --outSAMattributes All \
                 --alignSJoverhangMin 8 \
-                --alignSJDBoverhangMin 1 \
+                --alignSJDBoverhangMin 1 \s
                 --outFilterType BySJout \
                 --alignIntronMin 20 \
                 --alignIntronMax 1000000 \
