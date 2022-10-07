@@ -168,6 +168,7 @@ if (params.input) {
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
         .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true), file(row.control_fastq) ] }
+        .dump()
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
         /*
         if (file(null_control_fastqc)) {
@@ -540,18 +541,14 @@ process fastqc {
     read_name = reads.getName().split('\\.', 2)[0]
     new_reads = "${name}_reads_fastqc.${read_ext}"
     new_reads_simple = "${name}_reads_fastqc"
-    print(new_reads_simple)
 
     control_ext = control.getName().split('\\.', 2)[1]
     control_name = control.getName().split('\\.', 2)[0]
     new_control = "${name}_control_fastqc.${control_ext}"
     new_control_simple = "${name}_control_fastqc"
-    print(new_control_simple)
 
     """
-    echo ${name}
-    echo ${reads}
-    echo ${control}
+
     cp ${reads} ${new_reads}
     fastqc --quiet --threads $task.cpus ${new_reads}
     mv ${new_reads_simple}*.html ${name}_reads_fastqc.html
@@ -603,6 +600,7 @@ if (params.move_umi) {
 /*
  * STEP 2 - Read trimming
  */
+//  ch_umi_moved.dump()
 process cutadapt {
     tag "$name"
     // label 'process_high'memory '16 GB'    cpus 16
@@ -612,17 +610,17 @@ process cutadapt {
     tuple val(name), path(reads), path(control) from ch_umi_moved // 
 
     output:
-    tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}_control.trimmed.fastq.gz") into ch_trimmed
+    tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}.control.trimmed.fastq.gz") into ch_trimmed
 
     path "*.log" into ch_cutadapt_mqc
 
     script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
     """
-    ln -s $reads ${name}.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
+    ln -s $reads ${name}.reads.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.reads.fastq.gz > ${name}_cutadapt.log
 
     ln -s $control ${name}.control.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}_control.trimmed.fastq.gz ${name}_control.fastq.gz > ${name}_control_cutadapt.log
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control.trimmed.fastq.gz ${name}.control.fastq.gz > ${name}_control_cutadapt.log
     """
 }
 /*
