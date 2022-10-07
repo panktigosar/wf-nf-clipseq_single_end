@@ -637,8 +637,9 @@ if (params.smrna_fasta) {
         path(index) from ch_bt2_index.collect()
 
         output:
-        tuple val(name), path("${name}.unmapped.fastq.gz") into ch_unmapped
-        tuple val(name), path("${name}.premapped.bam"), path("${name}.premapped.bam.bai")
+        tuple val(name), path("${name}.unmapped.fastq.gz"), path("${name}.control.unmapped.fastq.gz") into ch_unmapped
+        tuple val(name), path("${name}.premapped.bam"), path("${name}.premapped.bam.bai"), path("${name}.control.premapped.bam"), path("${name}.control.premapped.bam.bai")
+
         path "*.log" into ch_premap_mqc, ch_premap_qc
 
         script:
@@ -647,9 +648,9 @@ if (params.smrna_fasta) {
         samtools sort -@ $task.cpus /dev/stdin > ${name}.premapped.bam && \
         samtools index -@ $task.cpus ${name}.premapped.bam
 
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}_control.unmapped.fastq.gz -U $control 2> ${name}_control.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}_control.premapped.bam && \
-        samtools index -@ $task.cpus ${name}_control.premapped.bam
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.control.unmapped.fastq.gz -U $control 2> ${name}.control.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.control.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.control.premapped.bam
         """
     }
 } else {
@@ -673,7 +674,7 @@ process align {
     path(index) from ch_star_index.collect()
 
     output:
-    tuple val(name), path("${name}.Aligned.sortedByCoord.out.bam"), path("${name}.Aligned.sortedByCoord.out.bam.bai"), path("${name}_control.Aligned.sortedByCoord.out.bam"), path("${name}_control.Aligned.sortedByCoord.out.bam.bai") into ch_aligned, ch_aligned_preseq
+    tuple val(name), path("${name}.Aligned.sortedByCoord.out.bam"), path("${name}.Aligned.sortedByCoord.out.bam.bai"), path("${name}.control.Aligned.sortedByCoord.out.bam"), path("${name}.control.Aligned.sortedByCoord.out.bam.bai") into ch_aligned, ch_aligned_preseq
     path "*.Log.final.out" into ch_align_mqc, ch_align_qc
 
     script:
@@ -707,11 +708,11 @@ process align {
         --readFilesIn $control --readFilesCommand gunzip -c \\
         --outFileNamePrefix ${name}. $clip_args
 
-    samtools sort -@ $task.cpus -o ${name}_control.Aligned.sortedByCoord.out.bam ${name}_control.Aligned.out.bam
-    samtools index -@ $task.cpus ${name}_control.Aligned.sortedByCoord.out.bam
+    samtools sort -@ $task.cpus -o ${name}.control.Aligned.sortedByCoord.out.bam ${name}.control.Aligned.out.bam
+    samtools index -@ $task.cpus ${name}.control.Aligned.sortedByCoord.out.bam
     """
 }
-
+ch_align_qc.dump()
 /*
  * STEP 5 - Aligning QC
  */
