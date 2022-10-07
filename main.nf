@@ -589,7 +589,7 @@ if (params.move_umi) {
             umi_tools \\
             extract \\
             -p "$params.move_umi" \\
-            -I $reads, $control \\
+            -I $control \\
             -S ${name}.umi.fastq.gz
         """
     }
