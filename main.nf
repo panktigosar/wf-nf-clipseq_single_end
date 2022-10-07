@@ -179,7 +179,7 @@ if (params.input) {
 } else {  
     exit 1, "Samples comma-separated input file not specified"
 }
-ch_fastq.dump()
+// ch_fastq.dump()
 ////////////////////////////////////////////////////
 /* --         PRINT PARAMETER SUMMARY          -- */
 ////////////////////////////////////////////////////
@@ -586,6 +586,12 @@ if (params.move_umi) {
             -p "$params.move_umi" \\
             -I $reads \\
             -S ${name}.umi.fastq.gz
+
+            umi_tools \\
+            extract \\
+            -p "$params.move_umi" \\
+            -I $reads, $control \\
+            -S ${name}.umi.fastq.gz
         """
     }
 } else {
@@ -607,12 +613,12 @@ process cutadapt {
     tuple val(name), path("${name}.trimmed.fastq.gz") into ch_trimmed
     path "*.log" into ch_cutadapt_mqc
 
-    script:
+    script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
     """
-    ln -s $reads ${name}.fastq.gz
+    $reads ${name}.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
 
-    ln -s $control ${name}.fastq.gz
+    $control ${name}.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.fastq.gz > ${name}_cutadapt.log
     """
 }
@@ -640,6 +646,10 @@ if (params.smrna_fasta) {
         bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.unmapped.fastq.gz -U $reads 2> ${name}.premap.log | \
         samtools sort -@ $task.cpus /dev/stdin > ${name}.premapped.bam && \
         samtools index -@ $task.cpus ${name}.premapped.bam
+
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}_control.unmapped.fastq.gz -U $control 2> ${name}_control.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}_control.premapped.bam && \
+        samtools index -@ $task.cpus ${name}_control.premapped.bam
         """
     }
 } else {
@@ -689,6 +699,16 @@ process align {
 
     samtools sort -@ $task.cpus -o ${name}.Aligned.sortedByCoord.out.bam ${name}.Aligned.out.bam
     samtools index -@ $task.cpus ${name}.Aligned.sortedByCoord.out.bam
+
+    STAR \\
+        --runThreadN $task.cpus \\
+        --runMode alignReads \\
+        --genomeDir $index \\
+        --readFilesIn $control --readFilesCommand gunzip -c \\
+        --outFileNamePrefix ${name}. $clip_args
+
+    samtools sort -@ $task.cpus -o ${name}_control.Aligned.sortedByCoord.out.bam ${name}_control.Aligned.out.bam
+    samtools index -@ $task.cpus ${name}_control.Aligned.sortedByCoord.out.bam
     """
 }
 
