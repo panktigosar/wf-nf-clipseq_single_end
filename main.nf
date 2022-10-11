@@ -866,7 +866,7 @@ process get_crosslinks {
     bedtools genomecov -dz -strand + -5 -i shifted.bed -g $fai | awk '{OFS="\t"}{print \$1, \$2, \$2+1, ".", \$3, "+"}' > pos.bed
     bedtools genomecov -dz -strand - -5 -i shifted.bed -g $fai | awk '{OFS="\t"}{print \$1, \$2, \$2+1, ".", \$3, "-"}' > neg.bed
     cat pos.bed neg.bed | sort -k1,1 -k2,2n | pigz > ${name}.control.xl.bed.gz
-    zcat ${name}.control.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$5} else {print \$1, \$2, \$3, -\$5}}' | pigz > ${name}.control.xl.bedgraph.gz
+    zcat ${name}.control.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$4, \$5} else {print \$1, \$2, \$3, \$4, -\$5}}' | pigz > ${name}.control.xl.bedgraph.gz
     """
 
 }
