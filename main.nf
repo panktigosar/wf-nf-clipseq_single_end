@@ -168,7 +168,7 @@ if (params.input) {
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
         .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true), file(row.control_fastq) ] }
-        .dump()
+        //.dump()
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
         /*
         if (file(null_control_fastqc)) {
@@ -658,7 +658,7 @@ if (params.smrna_fasta) {
     ch_premap_mqc = Channel.empty()
     ch_premap_qc = Channel.empty()
 }
-ch_trimmed.dump()
+//ch_trimmed.dump()
 /*
  * STEP 4 - Aligning
  */
@@ -713,7 +713,7 @@ process align {
     samtools index -@ $task.cpus ${name}.control.Aligned.sortedByCoord.out.bam
     """
 }
-ch_align_qc.dump()
+//ch_align_qc.dump()
 /*
  * STEP 5 - Aligning QC
  */
@@ -723,7 +723,7 @@ process preseq {
     publishDir "${params.outdir}/preseq", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(bam), path(bai) from ch_aligned_preseq
+    tuple val(name), path(bam), path(bai), path(bam_control), path(bai_control) from ch_aligned_preseq
 
     output:
     path '*.ccurve.txt' into ch_preseq_mqc
@@ -738,6 +738,13 @@ process preseq {
         -seed 42 \\
         $bam
     cp .command.err ${name}.command.log
+    preseq lc_extrap \\
+        -output ${name}.control.ccurve.txt \\
+        -verbose \\
+        -bam \\
+        -seed 42 \\
+        $bam_control
+    cp .command.err ${name}.control.command.log
     """
 }
 
@@ -751,10 +758,10 @@ if (params.deduplicate) {
         publishDir "${params.outdir}/dedup", mode: params.publish_dir_mode
 
         input:
-        tuple val(name), path(bam), path(bai) from ch_aligned
+        tuple val(name), path(bam), path(bai), path(bam_control), path(bai_control)from ch_aligned
 
         output:
-        tuple val(name), path("${name}.dedup.bam"), path("${name}.dedup.bam.bai") into ch_dedup, ch_dedup_pureclip, ch_dedup_rseqc
+        tuple val(name), path("${name}.dedup.bam"), path("${name}.dedup.bam.bai"), path("${name}.control.dedup.bam"), path("${name}.control.dedup.bam.bai") into ch_dedup, ch_dedup_pureclip, ch_dedup_rseqc
         path "*.log" into ch_dedup_mqc, ch_dedup_qc
 
         script:
@@ -767,6 +774,15 @@ if (params.deduplicate) {
             --output-stats=${name} \\
             --log=${name}.log
         samtools index -@ $task.cpus ${name}.dedup.bam
+
+        umi_tools \\
+            dedup \\
+            --umi-separator="$params.umi_separator" \\
+            -I $bam_control \\
+            -S ${name}.control.dedup.bam \\
+            --output-stats=${name}.control \\
+            --log=${name}.control.log
+        samtools index -@ $task.cpus ${name}.control.dedup.bam
         """
     }
 } else {
@@ -792,7 +808,7 @@ if (params.gtf) {
         publishDir "${params.outdir}/rseqc", mode: params.publish_dir_mode
 
         input:
-        tuple val(name), path(bam), path(bai) from ch_dedup_rseqc
+        tuple val(name), path(bam), path(bai), path(bam_contro), path(bai_contro) from ch_dedup_rseqc
         path(gtf) from ch_gtf_rseqc.collect()
 
         output:
@@ -806,6 +822,13 @@ if (params.gtf) {
             -i $bam \\
             -r gene.bed \\
             > ${name}.read_distribution.txt
+
+        gtf2bed $gtf > gene.bed
+
+        read_distribution.py \\
+            -i $bam_contro \\
+            -r gene.bed \\
+            > ${name}.control.read_distribution.txt
         """
     }
 } else {
@@ -821,12 +844,12 @@ process get_crosslinks {
     publishDir "${params.outdir}/xlinks", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(bam), path(bai) from ch_dedup
-    path(fai) from ch_fai_crosslinks.collect()
+    tuple val(name), path(bam), path(bai), path(bam_control), path(bai_control) from ch_dedup
+    path(fai), path(fai_control) from ch_fai_crosslinks.collect()
 
     output:
-    tuple val(name), path("${name}.xl.bed.gz") into ch_xlinks_icount, ch_xlinks_paraclu, ch_xlinks_piranha
-    tuple val(name), path("${name}.xl.bedgraph.gz") into ch_xlinks_bedgraphs
+    tuple val(name), path("${name}.xl.bed.gz"), path("${name}.control.xl.bed.gz") into ch_xlinks_icount, ch_xlinks_paraclu, ch_xlinks_piranha
+    tuple val(name), path("${name}.xl.bedgraph.gz"), path("${name}.control.xl.bedgraph.gz") into ch_xlinks_bedgraphs
     path "*.xl.bed.gz" into ch_xlinks_qc
 
     script:
@@ -837,7 +860,15 @@ process get_crosslinks {
     bedtools genomecov -dz -strand - -5 -i shifted.bed -g $fai | awk '{OFS="\t"}{print \$1, \$2, \$2+1, ".", \$3, "-"}' > neg.bed
     cat pos.bed neg.bed | sort -k1,1 -k2,2n | pigz > ${name}.xl.bed.gz
     zcat ${name}.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$5} else {print \$1, \$2, \$3, -\$5}}' | pigz > ${name}.xl.bedgraph.gz
+    
+    bedtools bamtobed -i $bam_control > dedup.bed
+    bedtools shift -m 1 -p -1 -i dedup.bed -g $fai_control > shifted.bed
+    bedtools genomecov -dz -strand + -5 -i shifted.bed -g $fai_control | awk '{OFS="\t"}{print \$1, \$2, \$2+1, ".", \$3, "+"}' > pos.bed
+    bedtools genomecov -dz -strand - -5 -i shifted.bed -g $fai_control | awk '{OFS="\t"}{print \$1, \$2, \$2+1, ".", \$3, "-"}' > neg.bed
+    cat pos.bed neg.bed | sort -k1,1 -k2,2n | pigz > ${name}.control.xl.bed.gz
+    zcat ${name}.control.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$5} else {print \$1, \$2, \$3, -\$5}}' | pigz > ${name}.control.xl.bedgraph.gz
     """
+
 }
 
 /*
