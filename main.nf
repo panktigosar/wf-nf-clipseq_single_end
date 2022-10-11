@@ -658,7 +658,7 @@ if (params.smrna_fasta) {
     ch_premap_mqc = Channel.empty()
     ch_premap_qc = Channel.empty()
 }
-
+ch_trimmed.dump()
 /*
  * STEP 4 - Aligning
  */
