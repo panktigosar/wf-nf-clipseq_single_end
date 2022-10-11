@@ -845,7 +845,7 @@ process get_crosslinks {
 
     input:
     tuple val(name), path(bam), path(bai), path(bam_control), path(bai_control) from ch_dedup
-    path(fai), path(fai_control) from ch_fai_crosslinks.collect()
+    path(fai) from ch_fai_crosslinks.collect()
 
     output:
     tuple val(name), path("${name}.xl.bed.gz"), path("${name}.control.xl.bed.gz") into ch_xlinks_icount, ch_xlinks_paraclu, ch_xlinks_piranha
