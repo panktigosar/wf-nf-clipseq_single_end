@@ -707,7 +707,7 @@ process align {
         --runMode alignReads \\
         --genomeDir $index \\
         --readFilesIn $control --readFilesCommand gunzip -c \\
-        --outFileNamePrefix ${name}. $clip_args
+        --outFileNamePrefix ${name}.control. $clip_args
 
     samtools sort -@ $task.cpus -o ${name}.control.Aligned.sortedByCoord.out.bam ${name}.control.Aligned.out.bam
     samtools index -@ $task.cpus ${name}.control.Aligned.sortedByCoord.out.bam
