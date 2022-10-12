@@ -808,7 +808,7 @@ if (params.gtf) {
         publishDir "${params.outdir}/rseqc", mode: params.publish_dir_mode
 
         input:
-        tuple val(name), path(bam), path(bai), path(bam_contro), path(bai_contro) from ch_dedup_rseqc
+        tuple val(name), path(bam), path(bai), path(bam_control), path(bai_control) from ch_dedup_rseqc
         path(gtf) from ch_gtf_rseqc.collect()
 
         output:
@@ -826,7 +826,7 @@ if (params.gtf) {
         gtf2bed $gtf > gene.bed
 
         read_distribution.py \\
-            -i $bam_contro \\
+            -i $bam_control \\
             -r gene.bed \\
             > ${name}.control.read_distribution.txt
         """
@@ -1083,17 +1083,17 @@ if ('piranha' in callers) {
         'piranha' in callers
 
         input:
-        tuple val(name), path(xlinks) from ch_xlinks_piranha
+        tuple val(name), path(xlinks_exp), path(xlinks_control) from ch_xlinks_piranha
 
         output:
-        tuple val(name), path("${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz") into ch_peaks_piranha
+        tuple val(name), path("${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz"), path("${name}.${bin_size_both}nt_${cluster_dist}control.nt.peaks.bed.gz") into ch_peaks_piranha
         path "*.peaks.bed.gz" into ch_piranha_qc
 
         script:
         bin_size_both = params.bin_size_both
         cluster_dist = params.cluster_dist
         """
-        pigz -d -c $xlinks | \\
+        pigz -d -c $xlinks_exp | \\
         awk '{OFS="\t"}{for(i=0;i<\$5;i++) print }' \\
         > expanded.bed
 
@@ -1106,6 +1106,20 @@ if ('piranha' in callers) {
 
         awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' paraclu.bed | \\
         pigz > ${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz
+
+        pigz -d -c $xlinks_control | \\
+        awk '{OFS="\t"}{for(i=0;i<\$5;i++) print }' \\
+        > expanded.bed
+
+        Piranha \\
+            expanded.bed \\
+            -s \\
+            -b $bin_size_both \\
+            -u $cluster_dist \\
+            -o paraclu.bed
+
+        awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' paraclu.bed | \\
+        pigz > ${name}.${bin_size_both}nt_${cluster_dist}control.nt.peaks.bed.gz
         """
     }
 
