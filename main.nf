@@ -1096,9 +1096,12 @@ if ('piranha' in callers) {
         pigz -d -c $xlinks_exp | \\
         awk '{OFS="\t"}{for(i=0;i<\$5;i++) print }' \\
         > expanded.bed
+         pigz -d -c $xlinks_control | \\
+        awk '{OFS="\t"}{for(i=0;i<\$5;i++) print }' \\
+        > control.expanded.bed
 
         Piranha \\
-            expanded.bed \\
+            expanded.bed control.expanded.bed\\
             -s \\
             -b $bin_size_both \\
             -u $cluster_dist \\
@@ -1106,20 +1109,6 @@ if ('piranha' in callers) {
 
         awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' paraclu.bed | \\
         pigz > ${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz
-
-        pigz -d -c $xlinks_control | \\
-        awk '{OFS="\t"}{for(i=0;i<\$5;i++) print }' \\
-        > expanded.bed
-
-        Piranha \\
-            expanded.bed \\
-            -s \\
-            -b $bin_size_both \\
-            -u $cluster_dist \\
-            -o paraclu.bed
-
-        awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' paraclu.bed | \\
-        pigz > ${name}.${bin_size_both}nt_${cluster_dist}control.nt.peaks.bed.gz
         """
     }
 
