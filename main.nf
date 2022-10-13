@@ -861,8 +861,8 @@ process get_crosslinks {
     cat pos.bed neg.bed | sort -k1,1 -k2,2n | pigz > ${name}.xl.bed.gz
     zcat ${name}.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$5} else {print \$1, \$2, \$3, -\$5}}' | pigz > ${name}.xl.bedgraph.gz
     
-    bedtools bamtobed -i $bam_control > ${name}.control.xl.bed.gz
-    
+    bedtools bamtobed -i $bam_control > ${name}.control.xl.bed
+    bgzip ${name}.control.xl.bed
     zcat ${name}.control.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$5} else {print \$1, \$2, \$3, -\$5}}' | pigz > ${name}.control.xl.bedgraph.gz
     """
 
