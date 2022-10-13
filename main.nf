@@ -863,8 +863,6 @@ process get_crosslinks {
     
     bedtools bamtobed -i $bam_control > dedup.bed
     bedtools shift -m 1 -p -1 -i dedup.bed -g $fai > ${name}.control.xl.bed.gz
-    
-    pigz > ${name}.control.xl.bed.gz
     zcat ${name}.control.xl.bed.gz | awk '{OFS = "\t"}{if (\$6 == "+") {print \$1, \$2, \$3, \$5} else {print \$1, \$2, \$3, -\$5}}' | pigz > ${name}.control.xl.bedgraph.gz
     """
 
