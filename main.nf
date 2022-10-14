@@ -1083,7 +1083,7 @@ if ('piranha' in callers) {
         tuple val(name), path(xlinks_exp), path(xlinks_control) from ch_xlinks_piranha
 
         output:
-        tuple val(name), path("${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz"), path("${name}.${bin_size_both}nt_${cluster_dist}control.nt.peaks.bed.gz") into ch_peaks_piranha
+        // tuple val(name), path("${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz"), path("${name}.${bin_size_both}nt_${cluster_dist}control.nt.peaks.bed.gz") into ch_peaks_piranha
         path "*.peaks.bed.gz" into ch_piranha_qc
 
         script:
