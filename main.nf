@@ -1103,6 +1103,7 @@ if ('piranha' in callers) {
             -s \\
             -b $bin_size_both \\
             -u $cluster_dist \\
+            -l \\
             -o paraclu.bed
 
         awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' paraclu.bed | \\
