@@ -1104,9 +1104,9 @@ if ('piranha' in callers) {
             -b $bin_size_both \\
             -u $cluster_dist \\
             -l \\
-            -o paraclu.bed
+            -o piranha.bed
 
-        awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' paraclu.bed | \\
+        awk '{OFS="\t"}{print \$1, \$2, \$3, ".", \$5, \$6}' piranha.bed | \\
         pigz > ${name}.${bin_size_both}nt_${cluster_dist}nt.peaks.bed.gz
         """
     }
