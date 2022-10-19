@@ -523,14 +523,14 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(r_1), path(c_1), path(r_2), path(c_2) from ch_fastq_fastqc_pretrim // check syntax
+    tuple val(name), path(read_1), path(read_2), path(control_1), path(control_2) from ch_fastq_fastqc_pretrim // check syntax
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
 
     script:
     read_1_ext = read_1.getName().split('\\.', 2)[1]
-    read_1_name = reads_1.getName().split('\\.', 2)[0]
+    read_1_name = read_1.getName().split('\\.', 2)[0]
     new_reads_1 = "${name}_r_1_fastqc.${r_1_ext}"
     new_reads_1_simple = "${name}_r_1_fastqc"
 
@@ -585,7 +585,7 @@ if (params.move_umi) {
                     }
 
         input:
-        tuple val(name), path(reads), path(control) from ch_fastq
+        tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_fastq
 
         output:
         tuple val(name), path("${name}.umi.fastq.gz") into ch_umi_moved
@@ -595,13 +595,25 @@ if (params.move_umi) {
         umi_tools \\
             extract \\
             -p "$params.move_umi" \\
-            -I $reads \\
+            -I $r_1 \\
             -S ${name}.umi.fastq.gz
 
-            umi_tools \\
+        umi_tools \\
             extract \\
             -p "$params.move_umi" \\
-            -I $control \\
+            -I $r_2 \\
+            -S ${name}.umi.fastq.gz
+
+        umi_tools \\
+            extract \\
+            -p "$params.move_umi" \\
+            -I $c_1 \\
+            -S ${name}.umi.fastq.gz
+        
+        umi_tools \\
+            extract \\
+            -p "$params.move_umi" \\
+            -I $c_2 \\
             -S ${name}.umi.fastq.gz
         """
     }
@@ -619,7 +631,7 @@ process cutadapt {
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(reads), path(control) from ch_umi_moved // 
+    tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_umi_moved // 
 
     output:
     tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}.control.trimmed.fastq.gz") into ch_trimmed
@@ -645,7 +657,7 @@ if (params.smrna_fasta) {
         publishDir "${params.outdir}/premap", mode: params.publish_dir_mode
 
         input:
-        tuple val(name), path(reads), path(control) from ch_trimmed
+        tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_trimmed
         path(index) from ch_bt2_index.collect()
 
         output:
