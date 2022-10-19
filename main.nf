@@ -531,7 +531,7 @@ process fastqc {
     script:
     read_1_ext = read_1.getName().split('\\.', 2)[1]
     read_1_name = read_1.getName().split('\\.', 2)[0]
-    new_reads_1 = "${name}_r_1_fastqc.${r_1_ext}"
+    new_reads_1 = "${name}_r_1_fastqc.${read_1_ext}"
     new_reads_1_simple = "${name}_r_1_fastqc"
 
     control_1_ext = control_1.getName().split('\\.', 2)[1]
@@ -541,7 +541,7 @@ process fastqc {
 
     read_2_ext = read_2.getName().split('\\.', 2)[1]
     read_2_name = read_2.getName().split('\\.', 2)[0]
-    new_reads_2 = "${name}_r_2_fastqc.${r_1_ext}"
+    new_reads_2 = "${name}_r_2_fastqc.${read_2_ext}"
     new_reads_2_simple = "${name}_r_2_fastqc"
 
     control_2_ext = control_2.getName().split('\\.', 2)[1]
@@ -640,11 +640,17 @@ process cutadapt {
 
     script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
     """
-    ln -s $reads ${name}.reads.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.trimmed.fastq.gz ${name}.reads.fastq.gz > ${name}_cutadapt.log
+    ln -s $r_1 ${name}.reads_1.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.reads_1.trimmed.fastq.gz ${name}.reads_1.fastq.gz > ${name}.reads_1_cutadapt.log
 
-    ln -s $control ${name}.control.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control.trimmed.fastq.gz ${name}.control.fastq.gz > ${name}_control_cutadapt.log
+    ln -s $r_2 ${name}.reads_2.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.reads_2.trimmed.fastq.gz ${name}.reads_2.fastq.gz > ${name}.reads_2_cutadapt.log
+
+    ln -s $c_1 ${name}.control_1.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control_1.trimmed.fastq.gz ${name}.control_1.fastq.gz > ${name}.control_1_cutadapt.log
+    
+    ln -s $c_2 ${name}.control_2.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control_2.trimmed.fastq.gz ${name}.control_2.fastq.gz > ${name}.control_2_cutadapt.log
     """
 }
 /*
