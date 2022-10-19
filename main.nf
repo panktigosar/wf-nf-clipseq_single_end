@@ -529,37 +529,47 @@ process fastqc {
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
 
     script:
-    read_1_ext = reads.getName().split('\\.', 2)[1]
-    read_1_name = reads.getName().split('\\.', 2)[0]
+    read_1_ext = read_1.getName().split('\\.', 2)[1]
+    read_1_name = reads_1.getName().split('\\.', 2)[0]
     new_reads_1 = "${name}_r_1_fastqc.${r_1_ext}"
     new_reads_1_simple = "${name}_r_1_fastqc"
 
-    control_1_ext = control.getName().split('\\.', 2)[1]
-    control_1_name = control.getName().split('\\.', 2)[0]
+    control_1_ext = control_1.getName().split('\\.', 2)[1]
+    control_1_name = control_1.getName().split('\\.', 2)[0]
     new_control_1 = "${name}_c_1_fastqc.${control_1_ext}"
     new_control_1_simple = "${name}_c_1_fastqc"
 
-    read_2_ext = reads.getName().split('\\.', 2)[1]
-    read_2_name = reads.getName().split('\\.', 2)[0]
+    read_2_ext = read_2.getName().split('\\.', 2)[1]
+    read_2_name = read_2.getName().split('\\.', 2)[0]
     new_reads_2 = "${name}_r_2_fastqc.${r_1_ext}"
     new_reads_2_simple = "${name}_r_2_fastqc"
 
-    control_2_ext = control.getName().split('\\.', 2)[1]
-    control_2_name = control.getName().split('\\.', 2)[0]
+    control_2_ext = control_2.getName().split('\\.', 2)[1]
+    control_2_name = control_2.getName().split('\\.', 2)[0]
     new_control_2 = "${name}_c_2_fastqc.${control_2_ext}"
     new_control_2_simple = "${name}_c_2_fastqc"
 
     """
 
-    cp ${reads} ${new_reads}
-    fastqc --quiet --threads $task.cpus ${new_reads}
-    mv ${new_reads_simple}*.html ${name}_reads_fastqc.html
-    mv ${new_reads_simple}*.zip ${name}_reads_fastqc.zip
+    cp ${read_1} ${new_read_1}
+    fastqc --quiet --threads $task.cpus ${new_read_1}
+    mv ${new_reads_1_simple}*.html ${name}_r_1_fastqc.html
+    mv ${new_reads_1_simple}*.zip ${name}_r_1_fastqc.zip
 
-    cp ${control} ${new_control}
-    fastqc --quiet --threads $task.cpus ${new_control}
-    mv ${new_control_simple}*.html ${name}_control_fastqc.html
-    mv ${new_control_simple}*.zip ${name}_control_fastqc.zip
+    cp ${read_2} ${new_read_2}
+    fastqc --quiet --threads $task.cpus ${new_read_2}
+    mv ${new_reads_2_simple}*.html ${name}_r_2_fastqc.html
+    mv ${new_reads_2_simple}*.zip ${name}_r_2_fastqc.zip
+
+    cp ${control_1} ${new_control_1}
+    fastqc --quiet --threads $task.cpus ${new_control_1}
+    mv ${new_control_1_simple}*.html ${name}_control_1_fastqc.html
+    mv ${new_control_1_simple}*.zip ${name}_control_1_fastqc.zip
+
+    cp ${control_2} ${new_control_2}
+    fastqc --quiet --threads $task.cpus ${new_control_2}
+    mv ${new_control_2_simple}*.html ${name}_control_2_fastqc.html
+    mv ${new_control_2_simple}*.zip ${name}_control_2_fastqc.zip
     """
 }
 /*
