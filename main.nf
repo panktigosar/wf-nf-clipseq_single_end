@@ -69,7 +69,6 @@ params.star_index = params.genome ? params.genomes[ params.genome ].star ?: fals
 // Check input path parameters to see if they exist
 checkPathParamList = [
     params.input,
-    //params.input_control,
     params.fasta,
     params.gtf,
     params.star_index,
@@ -167,15 +166,8 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true), file(row.control_fastq) ] }
-        //.dump()
+        .map{ row -> [ row.sample, file(row.exp1_fastq, checkIfExists: true), file(row.control1_fastq), file(row.exp2_fastq, checkIfExists: true), file(row.control2_fastq) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
-        /*
-        if (file(null_control_fastqc)) {
-            "The test sample is running with control"
-        } else {
-            "The test sample is running without control"
-        } */
         
 } else {  
     exit 1, "Samples comma-separated input file not specified"
@@ -531,21 +523,31 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(reads), path(control) from ch_fastq_fastqc_pretrim // check syntax
+    tuple val(name), path(r_1), path(c_1), path(r_2), path(c_2) from ch_fastq_fastqc_pretrim // check syntax
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
 
     script:
-    read_ext = reads.getName().split('\\.', 2)[1]
-    read_name = reads.getName().split('\\.', 2)[0]
-    new_reads = "${name}_reads_fastqc.${read_ext}"
-    new_reads_simple = "${name}_reads_fastqc"
+    read_1_ext = reads.getName().split('\\.', 2)[1]
+    read_1_name = reads.getName().split('\\.', 2)[0]
+    new_reads_1 = "${name}_r_1_fastqc.${r_1_ext}"
+    new_reads_1_simple = "${name}_r_1_fastqc"
 
-    control_ext = control.getName().split('\\.', 2)[1]
-    control_name = control.getName().split('\\.', 2)[0]
-    new_control = "${name}_control_fastqc.${control_ext}"
-    new_control_simple = "${name}_control_fastqc"
+    control_1_ext = control.getName().split('\\.', 2)[1]
+    control_1_name = control.getName().split('\\.', 2)[0]
+    new_control_1 = "${name}_c_1_fastqc.${control_1_ext}"
+    new_control_1_simple = "${name}_c_1_fastqc"
+
+    read_2_ext = reads.getName().split('\\.', 2)[1]
+    read_2_name = reads.getName().split('\\.', 2)[0]
+    new_reads_2 = "${name}_r_2_fastqc.${r_1_ext}"
+    new_reads_2_simple = "${name}_r_2_fastqc"
+
+    control_2_ext = control.getName().split('\\.', 2)[1]
+    control_2_name = control.getName().split('\\.', 2)[0]
+    new_control_2 = "${name}_c_2_fastqc.${control_2_ext}"
+    new_control_2_simple = "${name}_c_2_fastqc"
 
     """
 
