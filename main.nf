@@ -634,7 +634,7 @@ process cutadapt {
     tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_umi_moved // 
 
     output:
-    tuple val(name), path("${name}.trimmed.fastq.gz"), path("${name}.control.trimmed.fastq.gz") into ch_trimmed
+    tuple val(name), path("${name}.reads_1.trimmed.fastq.gz"), path("${name}.control_1.trimmed.fastq.gz"), path("${name}.reads_2.trimmed.fastq.gz"), path("${name}.control_2.trimmed.fastq.gz") into ch_trimmed
 
     path "*.log" into ch_cutadapt_mqc
 
