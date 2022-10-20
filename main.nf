@@ -531,8 +531,8 @@ process fastqc {
     script:
     read_1_ext = read_1.getName().split('\\.', 2)[1]
     read_1_name = read_1.getName().split('\\.', 2)[0]
-    new_reads_1 = "${name}_r_1_fastqc.${read_1_ext}"
-    new_reads_1_simple = "${name}_r_1_fastqc"
+    new_read_1 = "${name}_r_1_fastqc.${read_1_ext}"
+    new_read_1_simple = "${name}_r_1_fastqc"
 
     control_1_ext = control_1.getName().split('\\.', 2)[1]
     control_1_name = control_1.getName().split('\\.', 2)[0]
@@ -541,8 +541,8 @@ process fastqc {
 
     read_2_ext = read_2.getName().split('\\.', 2)[1]
     read_2_name = read_2.getName().split('\\.', 2)[0]
-    new_reads_2 = "${name}_r_2_fastqc.${read_2_ext}"
-    new_reads_2_simple = "${name}_r_2_fastqc"
+    new_read_2 = "${name}_r_2_fastqc.${read_2_ext}"
+    new_read_2_simple = "${name}_r_2_fastqc"
 
     control_2_ext = control_2.getName().split('\\.', 2)[1]
     control_2_name = control_2.getName().split('\\.', 2)[0]
@@ -553,13 +553,13 @@ process fastqc {
 
     cp ${read_1} ${new_read_1}
     fastqc --quiet --threads $task.cpus ${new_read_1}
-    mv ${new_reads_1_simple}*.html ${name}_r_1_fastqc.html
-    mv ${new_reads_1_simple}*.zip ${name}_r_1_fastqc.zip
+    mv ${new_read_1_simple}*.html ${name}_r_1_fastqc.html
+    mv ${new_read_1_simple}*.zip ${name}_r_1_fastqc.zip
 
     cp ${read_2} ${new_read_2}
     fastqc --quiet --threads $task.cpus ${new_read_2}
-    mv ${new_reads_2_simple}*.html ${name}_r_2_fastqc.html
-    mv ${new_reads_2_simple}*.zip ${name}_r_2_fastqc.zip
+    mv ${new_read_2_simple}*.html ${name}_r_2_fastqc.html
+    mv ${new_read_2_simple}*.zip ${name}_r_2_fastqc.zip
 
     cp ${control_1} ${new_control_1}
     fastqc --quiet --threads $task.cpus ${new_control_1}
