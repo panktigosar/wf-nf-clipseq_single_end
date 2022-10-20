@@ -36,7 +36,7 @@ By default, the pipeline currently performs the following:
     - Library complexity (`Preseq`)
     - Regional distribution (`RSeQC`)
 10. Overall pipeline run and QC summaries and peak calling comparisons (`MultiQC`)
-
+The current version is designed to take paired end reads and feeds the experimental and control files into Piranha and Pureclip peak callers. 
 ## Quick Start
 
 1. Install [`nextflow`](https://nf-co.re/usage/installation)
