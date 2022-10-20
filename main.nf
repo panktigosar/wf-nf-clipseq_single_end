@@ -708,7 +708,7 @@ process align {
     publishDir "${params.outdir}/mapped", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(r_1), path(c_1), path(r_2), path(c_2) from ch_unmapped
+    tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_unmapped
     path(index) from ch_star_index.collect()
 
     output:
