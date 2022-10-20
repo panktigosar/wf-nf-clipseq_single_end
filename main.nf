@@ -667,20 +667,28 @@ if (params.smrna_fasta) {
         path(index) from ch_bt2_index.collect()
 
         output:
-        tuple val(name), path("${name}.unmapped.fastq.gz"), path("${name}.control.unmapped.fastq.gz") into ch_unmapped
-        tuple val(name), path("${name}.premapped.bam"), path("${name}.premapped.bam.bai"), path("${name}.control.premapped.bam"), path("${name}.control.premapped.bam.bai")
+        tuple val(name), path("${name}.r_1.unmapped.fastq.gz"), path("${name}.c_1.unmapped.fastq.gz"), path("${name}.r_2.unmapped.fastq.gz"), path("${name}.c_2.unmapped.fastq.gz") into ch_unmapped
+        tuple val(name), path("${name}.r_1.premapped.bam"), path("${name}.r_1.premapped.bam.bai"), path("${name}.c_1.premapped.bam"), path("${name}.c_1.premapped.bam.bai"), path("${name}.r_2.premapped.bam"), path("${name}.r_2.premapped.bam.bai"), path("${name}.c_2.premapped.bam"), path("${name}.c_2.premapped.bam.bai")
 
         path "*.log" into ch_premap_mqc, ch_premap_qc
 
         script:
         """
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.unmapped.fastq.gz -U $reads 2> ${name}.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}.premapped.bam && \
-        samtools index -@ $task.cpus ${name}.premapped.bam
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r_1.unmapped.fastq.gz -U $r_1 2> ${name}.r_1.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.r_1.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.r_1.premapped.bam
 
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.control.unmapped.fastq.gz -U $control 2> ${name}.control.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}.control.premapped.bam && \
-        samtools index -@ $task.cpus ${name}.control.premapped.bam
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r_2.unmapped.fastq.gz -U $r_1 2> ${name}.r_2.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.r_2.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.r_2.premapped.bam
+
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.c_1.unmapped.fastq.gz -U $c_1 2> ${name}.c_1.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.c_1.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.c_1.premapped.bam
+
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.c_2.unmapped.fastq.gz -U $c_2 2> ${name}.c_2.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.c_2.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.c_2.premapped.bam
         """
     }
 } else {
