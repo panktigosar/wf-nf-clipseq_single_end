@@ -708,7 +708,7 @@ process align {
     publishDir "${params.outdir}/mapped", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(reads), path(control) from ch_unmapped
+    tuple val(name), path(r_1), path(c_1), path(r_2), path(c_2) from ch_unmapped
     path(index) from ch_star_index.collect()
 
     output:
@@ -734,7 +734,7 @@ process align {
         --runThreadN $task.cpus \\
         --runMode alignReads \\
         --genomeDir $index \\
-        --readFilesIn $reads --readFilesCommand gunzip -c \\
+        --readFilesIn $r_1 $r_2 --readFilesCommand gunzip -c \\
         --outFileNamePrefix ${name}. $clip_args
 
     samtools sort -@ $task.cpus -o ${name}.Aligned.sortedByCoord.out.bam ${name}.Aligned.out.bam
@@ -744,7 +744,7 @@ process align {
         --runThreadN $task.cpus \\
         --runMode alignReads \\
         --genomeDir $index \\
-        --readFilesIn $control --readFilesCommand gunzip -c \\
+        --readFilesIn $c_1 $c_2 --readFilesCommand gunzip -c \\
         --outFileNamePrefix ${name}.control. $clip_args
 
     samtools sort -@ $task.cpus -o ${name}.control.Aligned.sortedByCoord.out.bam ${name}.control.Aligned.out.bam
