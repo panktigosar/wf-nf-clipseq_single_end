@@ -588,7 +588,7 @@ if (params.move_umi) {
         tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_fastq
 
         output:
-        tuple val(name), path("${name}.umi.fastq.gz") into ch_umi_moved
+        tuple val(name), path("${name}.r_1.umi.fastq.gz"), path("${name}.r_2.umi.fastq.gz"), path("${name}.c_1.umi.fastq.gz"), path("${name}.c_2.umi.fastq.gz") into ch_umi_moved
 
         script:
         """
@@ -596,25 +596,25 @@ if (params.move_umi) {
             extract \\
             -p "$params.move_umi" \\
             -I $r_1 \\
-            -S ${name}.umi.fastq.gz
+            -S ${name}.r_1.umi.fastq.gz
 
         umi_tools \\
             extract \\
             -p "$params.move_umi" \\
             -I $r_2 \\
-            -S ${name}.umi.fastq.gz
+            -S ${name}.r_2.umi.fastq.gz
 
         umi_tools \\
             extract \\
             -p "$params.move_umi" \\
             -I $c_1 \\
-            -S ${name}.umi.fastq.gz
+            -S ${name}.c_1.umi.fastq.gz
         
         umi_tools \\
             extract \\
             -p "$params.move_umi" \\
             -I $c_2 \\
-            -S ${name}.umi.fastq.gz
+            -S ${name}.c_2.umi.fastq.gz
         """
     }
 } else {
@@ -634,7 +634,7 @@ process cutadapt {
     tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_umi_moved // 
 
     output:
-    tuple val(name), path("${name}.reads_1.trimmed.fastq.gz"), path("${name}.control_1.trimmed.fastq.gz"), path("${name}.reads_2.trimmed.fastq.gz"), path("${name}.control_2.trimmed.fastq.gz") into ch_trimmed
+    tuple val(name), path("${name}.reads_1.trimmed.fastq.gz"), path("${name}.reads_2.trimmed.fastq.gz"), path("${name}.control_1.trimmed.fastq.gz"),  path("${name}.control_2.trimmed.fastq.gz") into ch_trimmed
 
     path "*.log" into ch_cutadapt_mqc
 
