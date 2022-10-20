@@ -678,7 +678,7 @@ if (params.smrna_fasta) {
         samtools sort -@ $task.cpus /dev/stdin > ${name}.r_1.premapped.bam && \
         samtools index -@ $task.cpus ${name}.r_1.premapped.bam
 
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r_2.unmapped.fastq.gz -U $r_1 2> ${name}.r_2.premap.log | \
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r_2.unmapped.fastq.gz -U $r_2 2> ${name}.r_2.premap.log | \
         samtools sort -@ $task.cpus /dev/stdin > ${name}.r_2.premapped.bam && \
         samtools index -@ $task.cpus ${name}.r_2.premapped.bam
 
