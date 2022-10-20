@@ -523,7 +523,7 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(read_1), path(read_2), path(control_1), path(control_2) from ch_fastq_fastqc_pretrim // check syntax
+    tuple val(name), path(read_1), path(read_2), path(control_1), path(control_2) from ch_fastq_fastqc_pretrim
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
@@ -667,7 +667,7 @@ if (params.smrna_fasta) {
 
         output:
         tuple val(name), path("${name}.r_1.unmapped.fastq.gz"), path("${name}.r_2.unmapped.fastq.gz"), path("${name}.c_1.unmapped.fastq.gz"), path("${name}.c_2.unmapped.fastq.gz") into ch_unmapped
-        tuple val(name), path("${name}.r_1.premapped.bam"), path("${name}.r_1.premapped.bam.bai"), path("${name}.c_1.premapped.bam"), path("${name}.c_1.premapped.bam.bai"), path("${name}.r_2.premapped.bam"), path("${name}.r_2.premapped.bam.bai"), path("${name}.c_2.premapped.bam"), path("${name}.c_2.premapped.bam.bai")
+        tuple val(name), path("${name}.r_1.premapped.bam"), path("${name}.r_1.premapped.bam.bai"), path("${name}.r_2.premapped.bam"), path("${name}.r_2.premapped.bam.bai"), path("${name}.c_1.premapped.bam"), path("${name}.c_1.premapped.bam.bai"), path("${name}.c_2.premapped.bam"), path("${name}.c_2.premapped.bam.bai")
 
         path "*.log" into ch_premap_mqc, ch_premap_qc
 
