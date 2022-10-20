@@ -1050,7 +1050,7 @@ if ('pureclip' in callers) {
         'pureclip' in callers
 
         input:
-        tuple val(name), path(bam), path(bai) from ch_dedup_pureclip
+        tuple val(name), path(bam), path(bai), path(bam_control), path(bai_control) from ch_dedup_pureclip
         path(fasta) from ch_fasta_pureclip.collect()
 
         output:
@@ -1068,6 +1068,8 @@ if ('pureclip' in callers) {
             -i $bam \\
             -bai $bai \\
             -g $fasta \\
+            -ibam $bam_control \\
+            -ibai $bai_control \\
             -nt $task.cpus \\
             $args \\
             -o "${name}.sigxl.bed" \\
