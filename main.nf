@@ -166,7 +166,7 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp1_fastq, checkIfExists: true), file(row.control1_fastq), file(row.exp2_fastq, checkIfExists: true), file(row.control2_fastq) ] }
+        .map{ row -> [ row.sample, file(row.exp1_fastq, checkIfExists: true), file(row.exp2_fastq, checkIfExists: true), file(row.control1_fastq), file(row.control2_fastq) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
         
 } else {  
@@ -550,7 +550,6 @@ process fastqc {
     new_control_2_simple = "${name}_c_2_fastqc"
 
     """
-
     cp ${read_1} ${new_read_1}
     fastqc --quiet --threads $task.cpus ${new_read_1}
     mv ${new_read_1_simple}*.html ${name}_r_1_fastqc.html
