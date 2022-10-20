@@ -667,7 +667,7 @@ if (params.smrna_fasta) {
         path(index) from ch_bt2_index.collect()
 
         output:
-        tuple val(name), path("${name}.r_1.unmapped.fastq.gz"), path("${name}.c_1.unmapped.fastq.gz"), path("${name}.r_2.unmapped.fastq.gz"), path("${name}.c_2.unmapped.fastq.gz") into ch_unmapped
+        tuple val(name), path("${name}.r_1.unmapped.fastq.gz"), path("${name}.r_2.unmapped.fastq.gz"), path("${name}.c_1.unmapped.fastq.gz"), path("${name}.c_2.unmapped.fastq.gz") into ch_unmapped
         tuple val(name), path("${name}.r_1.premapped.bam"), path("${name}.r_1.premapped.bam.bai"), path("${name}.c_1.premapped.bam"), path("${name}.c_1.premapped.bam.bai"), path("${name}.r_2.premapped.bam"), path("${name}.r_2.premapped.bam.bai"), path("${name}.c_2.premapped.bam"), path("${name}.c_2.premapped.bam.bai")
 
         path "*.log" into ch_premap_mqc, ch_premap_qc
