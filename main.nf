@@ -639,10 +639,10 @@ process cutadapt {
 
     script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
     """
-    ln -s $r_1 ${name}.reads_1.fastq.gz
+    ln -s $r_1 ${name}.reads_1.fastq.gz $r_2 ${name}.reads_2.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.reads_1.trimmed.fastq.gz ${name}.reads_1.fastq.gz > ${name}.reads_1_cutadapt.log -A ${params.adapter} -m 12 -o ${name}.reads_2.trimmed.fastq.gz ${name}.reads_2.fastq.gz > ${name}.reads_2_cutadapt.log
 
-    ln -s $c_1 ${name}.control_1.fastq.gz
+    ln -s $c_1 ${name}.control_1.fastq.gz $c_2 ${name}.control_2.fastq.gz
     cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control_1.trimmed.fastq.gz ${name}.control_1.fastq.gz > ${name}.control_1_cutadapt.log -A ${params.adapter} -m 12 -o ${name}.control_2.trimmed.fastq.gz ${name}.control_2.fastq.gz > ${name}.control_2_cutadapt.log
     """
 }
@@ -650,6 +650,7 @@ process cutadapt {
  * STEP 3 - Premapping
  */
 if (params.smrna_fasta) {
+
     process premap {
         tag "$name"
         label 'process_high'
