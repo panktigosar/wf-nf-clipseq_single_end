@@ -534,15 +534,15 @@ process fastqc {
     new_read_1 = "${name}_r_1_fastqc.${read_1_ext}"
     new_read_1_simple = "${name}_r_1_fastqc"
 
-    control_1_ext = control_1.getName().split('\\.', 2)[1]
-    control_1_name = control_1.getName().split('\\.', 2)[0]
-    new_control_1 = "${name}_c_1_fastqc.${control_1_ext}"
-    new_control_1_simple = "${name}_c_1_fastqc"
-
     read_2_ext = read_2.getName().split('\\.', 2)[1]
     read_2_name = read_2.getName().split('\\.', 2)[0]
     new_read_2 = "${name}_r_2_fastqc.${read_2_ext}"
     new_read_2_simple = "${name}_r_2_fastqc"
+
+    control_1_ext = control_1.getName().split('\\.', 2)[1]
+    control_1_name = control_1.getName().split('\\.', 2)[0]
+    new_control_1 = "${name}_c_1_fastqc.${control_1_ext}"
+    new_control_1_simple = "${name}_c_1_fastqc"
 
     control_2_ext = control_2.getName().split('\\.', 2)[1]
     control_2_name = control_2.getName().split('\\.', 2)[0]
