@@ -166,7 +166,7 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp1_fastq, checkIfExists: true), file(row.exp2_fastq, checkIfExists: true), file(row.control1_fastq), file(row.control2_fastq) ] }
+        .map{ row -> [ row.sample, file(row.exp1_fastq, checkIfExists: true), file(row.exp2_fastq, checkIfExists: true), file(row.control1_fastq, checkIfExists: true), file(row.control2_fastq, checkIfExists: true) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
         
 } else {  
@@ -347,7 +347,7 @@ if (params.fasta) {
 
             script:
             """
-            pigz -d -c $fasta_gz > ${fasta_gz.baseName}
+            gunzip -d -c $fasta_gz > ${fasta_gz.baseName}
             """
         }
     }
