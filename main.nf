@@ -639,7 +639,8 @@ process cutadapt {
 
     script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
     """
-    compadaptor = echo ${params.adaptor} | tr ACGTacgt TGCAtgca | rev
+    compadaptor = ${params.adaptor} | tr ACGTacgt TGCAtgca | rev
+    echo ${params.adaptor}
     echo compadaptor
     ln -s $r_1 ${name}.reads_1.fastq.gz 
     ln -s $r_2 ${name}.reads_2.fastq.gz
