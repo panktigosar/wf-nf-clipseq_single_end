@@ -642,7 +642,7 @@ process cutadapt {
     
     ln -s $r_1 ${name}.reads_1.fastq.gz 
     ln -s $r_2 ${name}.reads_2.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -A ${params.adapter} -m 12 -o ${name}.reads_1.trimmed.fastq.gz ${name}.reads_1.fastq.gz > ${name}.reads_1_cutadapt.log -p ${name}.reads_2.trimmed.fastq.gz ${name}.reads_2.fastq.gz > ${name}.reads_2_cutadapt.log --pair-filter=both
+    cutadapt -j $task.cpus -a ${params.adapter} -A ${params.adapter} -m 12 --pair-filter=both -o ${name}.reads_1.trimmed.fastq.gz  -p ${name}.reads_2.trimmed.fastq.gz ${name}.reads_1.fastq.gz ${name}.reads_2.fastq.gz > ${name}.reads_paired_cutadapt.log 
     
     ln -s $c_1 ${name}.control_1.fastq.gz
     ln -s $c_2 ${name}.control_2.fastq.gz
