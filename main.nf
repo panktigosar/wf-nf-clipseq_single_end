@@ -1068,7 +1068,7 @@ if ('pureclip' in callers) {
             -ibam $bam_control \\
             -ibai $bai_control \\
             -nt $task.cpus \\
-            $args \\
+            -iv 'chr1;chr2;chr3;' \\
             -o "${name}.sigxl.bed" \\
             -or "${name}.${dm}nt.peaks.bed"
 
