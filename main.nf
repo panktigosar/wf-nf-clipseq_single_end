@@ -516,7 +516,7 @@ if (params.peakcaller && icount_check) {
  */
 process fastqc {
     tag "$name"
-    label 'process_medium'
+    label 'process_low'
     publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"
@@ -626,6 +626,8 @@ if (params.move_umi) {
 //  ch_umi_moved.dump()
 process cutadapt {
     tag "$name"
+    cpus 16
+    memory '16 GB'
     // label 'process_high'memory '16 GB'    cpus 16
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
@@ -875,7 +877,9 @@ if (params.gtf) {
  */
 process get_crosslinks {
     tag "$name"
-    label 'process_medium'
+    cpus 8
+    memory '16 GB'
+    // label 'process_medium'
     publishDir "${params.outdir}/xlinks", mode: params.publish_dir_mode
 
     input:
@@ -1040,7 +1044,9 @@ if ('paraclu' in callers) {
 if ('pureclip' in callers) {
     process pureclip_peak_call {
         tag "$name"
-        label 'process_high'
+        cpus 16
+        memory '36 GB'
+        // label 'process_high'
         publishDir "${params.outdir}/pureclip", mode: params.publish_dir_mode
 
         when:
@@ -1067,10 +1073,11 @@ if ('pureclip' in callers) {
             -g $fasta \\
             -ibam $bam_control \\
             -ibai $bai_control \\
+            -v \\
             -nt $task.cpus \\
             -iv 'chr1;chr2;chr3;' \\
-            -o "${name}.sigxl.bed" \\
-            -or "${name}.${dm}nt.peaks.bed"
+            -o "${name}.sigxl.bed" \\ //individual crosslinked sites associated with a score
+            -or "${name}.${dm}nt.peaks.bed" // individial crosslinked sites with distance 8 bp merged
 
         pigz ${name}.sigxl.bed ${name}.${dm}nt.peaks.bed
         """
@@ -1110,7 +1117,9 @@ if ('pureclip' in callers) {
 if ('piranha' in callers) {
     process piranha_peak_call {
         tag "$name"
-        label 'process_high'
+        cpus 16
+        memory '36 GB'
+        // label 'process_high'
         publishDir "${params.outdir}/piranha", mode: params.publish_dir_mode
 
         when:
