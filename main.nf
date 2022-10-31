@@ -1073,8 +1073,10 @@ if ('pureclip' in callers) {
             -g $fasta \\
             -ibam $bam_control \\
             -ibai $bai_control \\
-            -o "${name}.sigxl.bed" \\ //individual crosslinked sites associated with a score
-            -or "${name}.${dm}nt.peaks.bed" // individial crosslinked sites with distance 8 bp merged
+            -v \\
+            -nt 16 \\
+            -o "${name}.sigxl.bed" \\
+            -or "${name}.${dm}nt.peaks.bed"\\
 
         pigz ${name}.sigxl.bed ${name}.${dm}nt.peaks.bed
         """
