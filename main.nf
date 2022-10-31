@@ -1045,7 +1045,7 @@ if ('pureclip' in callers) {
     process pureclip_peak_call {
         tag "$name"
         cpus 16
-        memory '48 GB'
+        memory '36 GB'
         // label 'process_high'
         publishDir "${params.outdir}/pureclip", mode: params.publish_dir_mode
 
@@ -1074,7 +1074,7 @@ if ('pureclip' in callers) {
             -ibam $bam_control \\
             -ibai $bai_control \\
             -v \\
-            -nt 16 \\
+            -nt $task.cpus \\
             -iv 'chr1;chr2;chr3;' \\
             -o "${name}.sigxl.bed" \\
             -or "${name}.${dm}nt.peaks.bed"\\
