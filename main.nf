@@ -1045,7 +1045,7 @@ if ('pureclip' in callers) {
     process pureclip_peak_call {
         tag "$name"
         cpus 16
-        memory '36 GB'
+        memory '48 GB'
         // label 'process_high'
         publishDir "${params.outdir}/pureclip", mode: params.publish_dir_mode
 
@@ -1073,7 +1073,6 @@ if ('pureclip' in callers) {
             -g $fasta \\
             -ibam $bam_control \\
             -ibai $bai_control \\
-            -v \\
             -iv 'chr1;chr2;chr3;' \\
             -o "${name}.sigxl.bed" \\ //individual crosslinked sites associated with a score
             -or "${name}.${dm}nt.peaks.bed" // individial crosslinked sites with distance 8 bp merged
