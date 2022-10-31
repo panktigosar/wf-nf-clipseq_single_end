@@ -1074,7 +1074,6 @@ if ('pureclip' in callers) {
             -ibam $bam_control \\
             -ibai $bai_control \\
             -v \\
-            -nt $task.cpus \\
             -iv 'chr1;chr2;chr3;' \\
             -o "${name}.sigxl.bed" \\ //individual crosslinked sites associated with a score
             -or "${name}.${dm}nt.peaks.bed" // individial crosslinked sites with distance 8 bp merged
