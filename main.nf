@@ -1075,6 +1075,7 @@ if ('pureclip' in callers) {
             -ibai $bai_control \\
             -v \\
             -nt 16 \\
+            -iv 'chr1;chr2;chr3;' \\
             -o "${name}.sigxl.bed" \\
             -or "${name}.${dm}nt.peaks.bed"\\
 
