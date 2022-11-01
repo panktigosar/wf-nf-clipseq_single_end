@@ -7,3 +7,14 @@ tests/
 testing/
 testing*
 *.pyc
+*.bed
+*.bam
+*.bai
+*.csv
+*.fastq.gz
+*.fastq
+results/
+extraFiles/
+*.fa
+*.params
+mapped/
