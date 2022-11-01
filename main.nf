@@ -337,7 +337,9 @@ if (params.fasta) {
     if (hasExtension(params.fasta, 'gz')) {
         process decompress_fasta {
             tag "$fasta_gz"
-            label 'process_low'
+            //label 'process_low'
+            cpus 2
+            memory '5 GB'
 
             input:
             path(fasta_gz) from ch_fasta_gz
@@ -359,7 +361,9 @@ if (params.fasta) {
 if (!params.fai) {
     process generate_fai {
         tag "$fasta"
-        label 'process_low'
+        // label 'process_low'
+        cpus 2
+        memory '5 GB'
 
         input:
         path(fasta) from ch_fasta_fai
@@ -394,7 +398,9 @@ if (!params.star_index) {
         if (hasExtension(params.gtf, 'gz')) {
             process decompress_gtf {
                 tag "$gtf_gz"
-                label 'process_low'
+                //label 'process_low'
+                cpus 2
+                memory '5 GB'
 
                 input:
                 path(gtf_gz) from ch_gtf_gz_star
@@ -516,7 +522,9 @@ if (params.peakcaller && icount_check) {
  */
 process fastqc {
     tag "$name"
-    label 'process_low'
+    //label 'process_low'
+    cpus 2
+    memory '5 GB'
     publishDir "${params.outdir}/fastqc", mode: params.publish_dir_mode,
         saveAs: { filename ->
                       filename.indexOf(".zip") > 0 ? "zips/$filename" : "$filename"
@@ -626,7 +634,7 @@ if (params.move_umi) {
 //  ch_umi_moved.dump()
 process cutadapt {
     tag "$name"
-    cpus 16
+    cpus 8
     memory '16 GB'
     // label 'process_high'memory '16 GB'    cpus 16
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
@@ -756,7 +764,9 @@ process align {
  */
 process preseq {
     tag "$name"
-    label 'process_low'
+    //label 'process_low'
+    cpus 2
+    memory '5 GB'
     publishDir "${params.outdir}/preseq", mode: params.publish_dir_mode
 
     input:
@@ -841,7 +851,9 @@ if (params.gtf) {
 
     process rseqc {
         tag "$name"
-        label 'process_low'
+        //label 'process_low'
+        cpus 2
+        memory '5 GB'
         publishDir "${params.outdir}/rseqc", mode: params.publish_dir_mode
 
         input:
@@ -878,7 +890,7 @@ if (params.gtf) {
 process get_crosslinks {
     tag "$name"
     cpus 8
-    memory '16 GB'
+    memory '12 GB'
     // label 'process_medium'
     publishDir "${params.outdir}/xlinks", mode: params.publish_dir_mode
 
@@ -1190,7 +1202,9 @@ if ('piranha' in callers) {
  * STEP 8 - QC plots
  */
 process clipqc {
-    label 'process_low'
+    //label 'process_low'
+    cpus 2
+    memory '5 GB'
     publishDir "${params.outdir}/clipqc", mode: params.publish_dir_mode 
 
     input:
@@ -1234,7 +1248,9 @@ process clipqc {
  * STEP 9 - MultiQC
  */
 process multiqc {
-    label 'process_low'
+    //label 'process_low'
+    cpus 2
+    memory '5 GB'
     publishDir "${params.outdir}/multiqc", mode: params.publish_dir_mode
 
     input:
