@@ -20,22 +20,13 @@ library(ggvenn)
 library(ChIPseeker)
 library(GenomicFeatures)
 ```
-library(SummarizedExperiment)
-library(nextrnaColors)
-library(edgeR)
-library(ggpubr)
-library(ggrepel)
-library(plotly)
-# library(tidyverse)
-# library(cluster)
-library(pheatmap)
-Loading the .bed files (Output from clip-seq)
+
+
 ```{r}
 file <- "/shared/data/results/pgosar/clipseq/analysis/hepg2_Lin28b.8nt.peaks.bed"
 # ref_file <- "/shared/nextrna-resources/grch38/gencode.v42.annotation.sorted.gtf" # Not using this
 bed <- rtracklayer::import(file)
 ```
-
 
 
 ```{r}
@@ -46,7 +37,6 @@ bed <- rtracklayer::import(file)
 ```{r}
 
 ```
-
 
 ChIPseeker
 ```{r, fig.align='center', fig.width=20, fig.height=20}
@@ -97,7 +87,7 @@ head(pathway2, 2)
 dotplot(pathway2)
 ```
 # Gene Set Enrichment Analysis
-
+The gene ratio is the ratio of the enriched genes with respect to the total number of genes in the pathway
 # Kegg Pathway
 ``` {r, fig.height=8}
 peakAnno_kegg <- enrichKEGG(as.data.frame(peakAnno)$geneId, pvalueCutoff = 0.05, pAdjustMethod = "BH")
@@ -106,7 +96,7 @@ dotplot(peakAnno_kegg, showCategory= 20, title="KEGG Pathway Enrichment Analysis
 
 # Biological Processes
 ``` {r, fig.height=10}
-# enrichgobp <- enrichGO(gene, 'org.Hs.eg.db', ont="BP", pvalueCutoff = 0.05, pAdjustMethod = "BH", readable = T)
+enrichgobp <- enrichGO(gene, 'org.Hs.eg.db', ont="BP", pvalueCutoff = 0.05, pAdjustMethod = "BH", readable = T)
 dotplot(enrichgobp, showCategory= 20, title="GO biological process Pathway Enrichment Analysis")
 ```
 
