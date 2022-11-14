@@ -166,7 +166,7 @@ if (params.input) {
     Channel
         .fromPath(params.input, checkIfExists: true)
         .splitCsv(header:true)
-        .map{ row -> [ row.sample, file(row.exp1_fastq, checkIfExists: true), file(row.exp2_fastq, checkIfExists: true), file(row.control1_fastq, checkIfExists: true), file(row.control2_fastq, checkIfExists: true) ] }
+        .map{ row -> [ row.sample, file(row.exp_fastq, checkIfExists: true), file(row.control_fastq, checkIfExists: true) ] }
         .into{ ch_fastq; ch_fastq_fastqc_pretrim }
         
 } else {  
@@ -531,52 +531,32 @@ process fastqc {
                 }
 
     input:
-    tuple val(name), path(read_1), path(read_2), path(control_1), path(control_2) from ch_fastq_fastqc_pretrim
+    tuple val(name), path(read), path(control) from ch_fastq_fastqc_pretrim
 
     output:
     file "*fastqc.{zip,html}" into ch_fastqc_pretrim_mqc
 
     script:
-    read_1_ext = read_1.getName().split('\\.', 2)[1]
-    read_1_name = read_1.getName().split('\\.', 2)[0]
-    new_read_1 = "${name}_r_1_fastqc.${read_1_ext}"
-    new_read_1_simple = "${name}_r_1_fastqc"
+    read_ext = read.getName().split('\\.', 2)[1]
+    read_name = read.getName().split('\\.', 2)[0]
+    new_read = "${name}_r_fastqc.${read_ext}"
+    new_read_simple = "${name}_r_fastqc"
 
-    read_2_ext = read_2.getName().split('\\.', 2)[1]
-    read_2_name = read_2.getName().split('\\.', 2)[0]
-    new_read_2 = "${name}_r_2_fastqc.${read_2_ext}"
-    new_read_2_simple = "${name}_r_2_fastqc"
-
-    control_1_ext = control_1.getName().split('\\.', 2)[1]
-    control_1_name = control_1.getName().split('\\.', 2)[0]
-    new_control_1 = "${name}_c_1_fastqc.${control_1_ext}"
-    new_control_1_simple = "${name}_c_1_fastqc"
-
-    control_2_ext = control_2.getName().split('\\.', 2)[1]
-    control_2_name = control_2.getName().split('\\.', 2)[0]
-    new_control_2 = "${name}_c_2_fastqc.${control_2_ext}"
-    new_control_2_simple = "${name}_c_2_fastqc"
+    control_ext = control.getName().split('\\.', 2)[1]
+    control_name = control.getName().split('\\.', 2)[0]
+    new_control = "${name}_c_fastqc.${control_ext}"
+    new_control_simple = "${name}_c_fastqc"
 
     """
-    cp ${read_1} ${new_read_1}
-    fastqc --quiet --threads $task.cpus ${new_read_1}
-    mv ${new_read_1_simple}*.html ${name}_r_1_fastqc.html
-    mv ${new_read_1_simple}*.zip ${name}_r_1_fastqc.zip
+    cp ${read} ${new_read}
+    fastqc --quiet --threads $task.cpus ${new_read}
+    mv ${new_read_simple}*.html ${name}_r_fastqc.html
+    mv ${new_read_simple}*.zip ${name}_r_fastqc.zip
 
-    cp ${read_2} ${new_read_2}
-    fastqc --quiet --threads $task.cpus ${new_read_2}
-    mv ${new_read_2_simple}*.html ${name}_r_2_fastqc.html
-    mv ${new_read_2_simple}*.zip ${name}_r_2_fastqc.zip
-
-    cp ${control_1} ${new_control_1}
-    fastqc --quiet --threads $task.cpus ${new_control_1}
-    mv ${new_control_1_simple}*.html ${name}_control_1_fastqc.html
-    mv ${new_control_1_simple}*.zip ${name}_control_1_fastqc.zip
-
-    cp ${control_2} ${new_control_2}
-    fastqc --quiet --threads $task.cpus ${new_control_2}
-    mv ${new_control_2_simple}*.html ${name}_control_2_fastqc.html
-    mv ${new_control_2_simple}*.zip ${name}_control_2_fastqc.zip
+    cp ${control} ${new_control}
+    fastqc --quiet --threads $task.cpus ${new_control}
+    mv ${new_control_simple}*.html ${name}_c_fastqc.html
+    mv ${new_control_simple}*.zip ${name}_c_fastqc.zip
     """
 }
 /*
@@ -592,36 +572,24 @@ if (params.move_umi) {
                     }
 
         input:
-        tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_fastq
+        tuple val(name), path(r), path(c) from ch_fastq
 
         output:
-        tuple val(name), path("${name}.r_1.umi.fastq.gz"), path("${name}.r_2.umi.fastq.gz"), path("${name}.c_1.umi.fastq.gz"), path("${name}.c_2.umi.fastq.gz") into ch_umi_moved
+        tuple val(name), path("${name}.r.umi.fastq.gz"), path("${name}.c.umi.fastq.gz") into ch_umi_moved
 
         script:
         """
         umi_tools \\
             extract \\
             -p "$params.move_umi" \\
-            -I $r_1 \\
-            -S ${name}.r_1.umi.fastq.gz
+            -I $r \\
+            -S ${name}.r.umi.fastq.gz
 
         umi_tools \\
             extract \\
             -p "$params.move_umi" \\
-            -I $r_2 \\
-            -S ${name}.r_2.umi.fastq.gz
-
-        umi_tools \\
-            extract \\
-            -p "$params.move_umi" \\
-            -I $c_1 \\
-            -S ${name}.c_1.umi.fastq.gz
-        
-        umi_tools \\
-            extract \\
-            -p "$params.move_umi" \\
-            -I $c_2 \\
-            -S ${name}.c_2.umi.fastq.gz
+            -I $c \\
+            -S ${name}.c.umi.fastq.gz
         """
     }
 } else {
@@ -640,23 +608,21 @@ process cutadapt {
     publishDir "${params.outdir}/cutadapt", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_umi_moved // 
+    tuple val(name), path(r), path(c) from ch_umi_moved // 
 
     output:
-    tuple val(name), path("${name}.reads_1.trimmed.fastq.gz"), path("${name}.reads_2.trimmed.fastq.gz"), path("${name}.control_1.trimmed.fastq.gz"),  path("${name}.control_2.trimmed.fastq.gz") into ch_trimmed
+    tuple val(name), path("${name}.reads.trimmed.fastq.gz"), path("${name}.control.trimmed.fastq.gz") into ch_trimmed
 
     path "*.log" into ch_cutadapt_mqc
 
     script: // ln -s $reads ${name}.fastq.gz There is original file in testing folder put the "ln -s" back after testing is complete
     """
     
-    ln -s $r_1 ${name}.reads_1.fastq.gz 
-    ln -s $r_2 ${name}.reads_2.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -A ${params.adapter} -m 12 -o ${name}.reads_1.trimmed.fastq.gz -p ${name}.reads_2.trimmed.fastq.gz ${name}.reads_1.fastq.gz ${name}.reads_2.fastq.gz > ${name}.reads_paired_cutadapt.log 
+    ln -s $r_1 ${name}.reads.fastq.gz 
+    cutadapt -j $task.cpus -a ${params.adapter}  -m 12 -o ${name}.reads.trimmed.fastq.gz ${name}.reads.fastq.gz > ${name}.reads_cutadapt.log 
     
-    ln -s $c_1 ${name}.control_1.fastq.gz
-    ln -s $c_2 ${name}.control_2.fastq.gz
-    cutadapt -j $task.cpus -a ${params.adapter} -A ${params.adapter} -m 12 -o ${name}.control_1.trimmed.fastq.gz -p ${name}.control_2.trimmed.fastq.gz ${name}.control_1.fastq.gz ${name}.control_2.fastq.gz > ${name}.control_paired_cutadapt.log
+    ln -s $c_1 ${name}.control.fastq.gz
+    cutadapt -j $task.cpus -a ${params.adapter} -m 12 -o ${name}.control.trimmed.fastq.gz ${name}.control.fastq.gz > ${name}.control_cutadapt.log
     """
 }
 /*
@@ -670,32 +636,24 @@ if (params.smrna_fasta) {
         publishDir "${params.outdir}/premap", mode: params.publish_dir_mode
 
         input:
-        tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_trimmed
+        tuple val(name), path(r), path(c) from ch_trimmed
         path(index) from ch_bt2_index.collect()
 
         output:
-        tuple val(name), path("${name}.r_1.unmapped.fastq.gz"), path("${name}.r_2.unmapped.fastq.gz"), path("${name}.c_1.unmapped.fastq.gz"), path("${name}.c_2.unmapped.fastq.gz") into ch_unmapped
-        tuple val(name), path("${name}.r_1.premapped.bam"), path("${name}.r_1.premapped.bam.bai"), path("${name}.r_2.premapped.bam"), path("${name}.r_2.premapped.bam.bai"), path("${name}.c_1.premapped.bam"), path("${name}.c_1.premapped.bam.bai"), path("${name}.c_2.premapped.bam"), path("${name}.c_2.premapped.bam.bai")
+        tuple val(name), path("${name}.r.unmapped.fastq.gz"), path("${name}.c.unmapped.fastq.gz") into ch_unmapped
+        tuple val(name), path("${name}.r.premapped.bam"), path("${name}.r.premapped.bam.bai"), path("${name}.c.premapped.bam"), path("${name}.c.premapped.bam.bai")
 
         path "*.log" into ch_premap_mqc, ch_premap_qc
 
         script:
         """
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r_1.unmapped.fastq.gz -U $r_1 2> ${name}.r_1.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}.r_1.premapped.bam && \
-        samtools index -@ $task.cpus ${name}.r_1.premapped.bam
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r.unmapped.fastq.gz -U $r 2> ${name}.r.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.r.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.r.premapped.bam
 
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.r_2.unmapped.fastq.gz -U $r_2 2> ${name}.r_2.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}.r_2.premapped.bam && \
-        samtools index -@ $task.cpus ${name}.r_2.premapped.bam
-
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.c_1.unmapped.fastq.gz -U $c_1 2> ${name}.c_1.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}.c_1.premapped.bam && \
-        samtools index -@ $task.cpus ${name}.c_1.premapped.bam
-
-        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.c_2.unmapped.fastq.gz -U $c_2 2> ${name}.c_2.premap.log | \
-        samtools sort -@ $task.cpus /dev/stdin > ${name}.c_2.premapped.bam && \
-        samtools index -@ $task.cpus ${name}.c_2.premapped.bam
+        bowtie2 -p $task.cpus -x ${index[0].simpleName} --un-gz ${name}.c.unmapped.fastq.gz -U $c 2> ${name}.c.premap.log | \
+        samtools sort -@ $task.cpus /dev/stdin > ${name}.c.premapped.bam && \
+        samtools index -@ $task.cpus ${name}.c.premapped.bam
         """
     }
 } else {
@@ -715,7 +673,7 @@ process align {
     publishDir "${params.outdir}/mapped", mode: params.publish_dir_mode
 
     input:
-    tuple val(name), path(r_1), path(r_2), path(c_1), path(c_2) from ch_unmapped
+    tuple val(name), path(r) path(c) from ch_unmapped
     path(index) from ch_star_index.collect()
 
     output:
@@ -741,7 +699,7 @@ process align {
         --runThreadN $task.cpus \\
         --runMode alignReads \\
         --genomeDir $index \\
-        --readFilesIn $r_1 $r_2 --readFilesCommand gunzip -c \\
+        --readFilesIn $r --readFilesCommand gunzip -c \\
         --outFileNamePrefix ${name}. $clip_args
 
     samtools sort -@ $task.cpus -o ${name}.Aligned.sortedByCoord.out.bam ${name}.Aligned.out.bam
@@ -751,7 +709,7 @@ process align {
         --runThreadN $task.cpus \\
         --runMode alignReads \\
         --genomeDir $index \\
-        --readFilesIn $c_1 $c_2 --readFilesCommand gunzip -c \\
+        --readFilesIn $c --readFilesCommand gunzip -c \\
         --outFileNamePrefix ${name}.control. $clip_args
 
     samtools sort -@ $task.cpus -o ${name}.control.Aligned.sortedByCoord.out.bam ${name}.control.Aligned.out.bam
